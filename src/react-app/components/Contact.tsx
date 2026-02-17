@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { Send, CheckCircle } from "lucide-react";
+import { useState } from 'react';
+import { Send, CheckCircle } from 'lucide-react';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
-    name: "",
-    project: "",
-    budget: "",
-    message: "",
+    name: '',
+    project: '',
+    budget: '',
+    message: ''
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -17,49 +17,45 @@ export default function Contact() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
+      const response = await fetch('/api/contact', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData)
       });
 
       if (response.ok) {
         setIsSubmitted(true);
         setFormData({
-          name: "",
-          project: "",
-          budget: "",
-          message: "",
+          name: '',
+          project: '',
+          budget: '',
+          message: ''
         });
-
         setTimeout(() => setIsSubmitted(false), 3000);
       } else {
-        alert("Erro ao enviar. Tente novamente.");
+        alert('Erro ao enviar. Tente novamente.');
       }
     } catch (error) {
-      alert("Erro ao enviar. Tente novamente.");
+      alert('Erro ao enviar. Tente novamente.');
     }
 
     setIsLoading(false);
   };
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]: e.target.value
     });
   };
 
   return (
     <section id="contato" className="py-24 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* HEADER */}
         <div className="text-center mb-16">
           <h2 className="text-5xl md:text-6xl font-black text-primary-purple mb-6">
             Gostou do que viu?
@@ -70,8 +66,7 @@ export default function Contact() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* FORM CARD */}
-          <div className="bg-gradient-to-br from-primary-purple/10 to-primary-purple-light/10 backdrop-blur-sm border border-white/10 rounded-2xl p-8 relative overflow-hidden shadow-xl">
+          <div className="bg-gradient-to-br from-primary-purple/10 to-primary-purple-light/10 backdrop-blur-sm rounded-2xl p-8 relative overflow-hidden">
             <h3 className="text-3xl font-black text-primary-purple mb-6">
               Solicitar Orçamento
             </h3>
@@ -90,7 +85,7 @@ export default function Contact() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* NOME */}
+
                 <div>
                   <label className="block text-sm font-semibold text-white/90 mb-2">
                     Nome *
@@ -101,12 +96,11 @@ export default function Contact() {
                     required
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent transition"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-primary-purple/30 text-white"
                     placeholder="Seu nome completo"
                   />
                 </div>
 
-                {/* PROJETO */}
                 <div>
                   <label className="block text-sm font-semibold text-white/90 mb-2">
                     Tipo de Projeto
@@ -115,27 +109,16 @@ export default function Contact() {
                     name="project"
                     value={formData.project}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent transition"
+                    className="w-full px-4 py-3 rounded-xl bg-primary-purple/20 border border-primary-purple/30 text-white"
                   >
-                    <option className="bg-black text-white" value="">
-                      Selecione uma opção
-                    </option>
-                    <option className="bg-black text-white" value="animacao-2d">
-                      Animação 2D
-                    </option>
-                    <option className="bg-black text-white" value="rigging">
-                      Loop Rigging
-                    </option>
-                    <option className="bg-black text-white" value="motion-design">
-                      Motion Design
-                    </option>
-                    <option className="bg-black text-white" value="outro">
-                      Outro
-                    </option>
+                    <option value="">Selecione uma opção</option>
+                    <option value="animacao-2d">Animação 2D</option>
+                    <option value="rigging">Loop Rigging</option>
+                    <option value="motion-design">Motion Design</option>
+                    <option value="outro">Outro</option>
                   </select>
                 </div>
 
-                {/* ORÇAMENTO */}
                 <div>
                   <label className="block text-sm font-semibold text-white/90 mb-2">
                     Orçamento Estimado
@@ -145,12 +128,11 @@ export default function Contact() {
                     name="budget"
                     value={formData.budget}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent transition"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-primary-purple/30 text-white"
                     placeholder="Ex: R$ 500 - R$ 1000"
                   />
                 </div>
 
-                {/* MENSAGEM */}
                 <div>
                   <label className="block text-sm font-semibold text-white/90 mb-2">
                     Mensagem *
@@ -161,64 +143,62 @@ export default function Contact() {
                     rows={4}
                     value={formData.message}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 resize-none focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent transition"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-primary-purple/30 text-white resize-none"
                     placeholder="Conte-me mais sobre seu projeto..."
                   />
                 </div>
 
-                {/* BOTÃO */}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-primary-purple to-primary-purple-light text-white py-4 px-6 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:opacity-90 transition disabled:opacity-70"
+                  className="w-full bg-gradient-to-r from-primary-purple to-primary-purple-light text-white py-4 px-6 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 disabled:opacity-70"
                 >
-                  {isLoading ? (
-                    "Enviando..."
-                  ) : (
+                  {isLoading ? "Enviando..." : (
                     <>
                       <Send size={20} />
                       Enviar Mensagem
                     </>
                   )}
                 </button>
+
               </form>
             )}
           </div>
 
-          {/* CONTATO LATERAL */}
           <div className="space-y-8">
             <h3 className="text-3xl font-black text-primary-purple mb-6">
               Outras Formas de Contato
             </h3>
 
             <div className="text-white/80">
-              <span className="font-semibold text-white">Discord:</span> drop_aex
+              Discord: <span className="font-semibold">drop_aex</span>
             </div>
 
             <div className="text-white/80">
-              <span className="font-semibold text-white">X (Twitter):</span>{" "}
+              X (Twitter):
               <a
                 href="https://x.com/Drop_aex"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-purple hover:underline ml-1"
+                className="text-primary-purple ml-1"
               >
                 @Drop_aex
               </a>
             </div>
 
             <div className="text-white/80">
-              <span className="font-semibold text-white">Behance:</span>{" "}
+              Behance:
               <a
                 href="https://www.behance.net/drop_aex"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-purple hover:underline ml-1"
+                className="text-primary-purple ml-1"
               >
                 drop_aex
               </a>
             </div>
           </div>
+
         </div>
       </div>
     </section>
