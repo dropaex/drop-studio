@@ -10,11 +10,36 @@ export default function Contact() {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
+    const response = await fetch("/api/contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      throw new Error("Erro ao enviar");
+    }
+
     setIsSubmitted(true);
+
+    setFormData({
+      name: "",
+      project: "",
+      budget: "",
+      message: "",
+    });
+
     setTimeout(() => setIsSubmitted(false), 3000);
-  };
+  } catch (error) {
+    alert("Erro ao enviar mensagem. Tente novamente.");
+  }
+};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
