@@ -7,7 +7,7 @@ import Services from '@/react-app/components/Services';
 import Contact from '@/react-app/components/Contact';
 import Footer from '@/react-app/components/Footer';
 
-export default function Home() {
+export default function home() {
   const [currentSection, setCurrentSection] = useState('home');
 
   useEffect(() => {
