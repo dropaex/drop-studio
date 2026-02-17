@@ -9,9 +9,40 @@ export default function Contact() {
     message: ''
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
+  setIsLoading(true);
+
+  try {
+    const response = await fetch("/api/contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      throw new Error("Erro ao enviar");
+    }
+
+    setIsSubmitted(true);
+
+    setFormData({
+      name: "",
+      project: "",
+      budget: "",
+      message: "",
+    });
+
+    setTimeout(() => setIsSubmitted(false), 3000);
+  } catch (error) {
+    alert("Erro ao enviar mensagem. Tente novamente.");
+  } finally {
+    setIsLoading(false);
+};
 
   try {
     const response = await fetch("/api/contact", {
@@ -173,12 +204,13 @@ export default function Contact() {
                 </div>
 
                 <button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-primary-purple to-primary-purple-light text-white py-4 px-6 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-primary-purple/60 transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105"
-                >
-                  <Send size={20} />
-                  Enviar Mensagem
-                </button>
+  type="submit"
+  disabled={isLoading}
+  className="w-full bg-gradient-to-r from-primary-purple to-primary-purple-light text-white py-4 px-6 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-primary-purple/60 transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
+>
+  <Send size={20} />
+  {isLoading ? "Enviando..." : "Enviar Mensagem"}
+</button>
               </form>
             )}
           </div>
