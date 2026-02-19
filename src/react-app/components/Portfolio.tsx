@@ -30,7 +30,7 @@ export default function Portfolio() {
       category: "2d",
       description: "Comissão Animada para Player Tauz",
       tools: ["After Effects", "Photoshop"],
-      video: "/videos/comp1.mp4"
+      video: "https://mocha-cdn.com/0199ca3f-5871-7d40-b087-febfeb43f048/Drop_-_Refra_o_que_eu_fiz_pro_TauzOficial_rapaziada_to_pensando_em_fzr_um_..._KILlQM-(1).gif"
     },
     {
       id: 4,
@@ -105,15 +105,11 @@ export default function Portfolio() {
                   </div>
                 ) : project.image ? (
                   <div className="relative bg-gradient-to-br from-black/60 to-black/40">
-                     <video
-      src={project.video}
-      autoPlay
-      loop
-      muted
-      playsInline
-      preload="metadata"
-      className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-700"
-    />
+                    <img 
+                      src={project.image} 
+                      alt={project.title} 
+                      className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-700" 
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-primary-purple/50 via-primary-purple/10 to-transparent pointer-events-none"></div>
                     <div className="absolute inset-0 bg-gradient-to-t from-primary-purple/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
                       <Play size={64} className="text-white transform scale-75 group-hover:scale-100 transition-transform" fill="white" />
