@@ -38,7 +38,7 @@ export default function Portfolio() {
       id: 4,
       title: "Rigging Facial 2D",
       category: "2d",
-      description: "Sistema de rigging facial 2D para expressões dinâmicas",
+      description: "Rigging facial 2D com expressões dinâmicas",
       tools: ["After Effects", "Duik", "Photoshop"],
       video: "https://mocha-cdn.com/0199ca3f-5871-7d40-b087-febfeb43f048/Comp-2.gif"
     }
