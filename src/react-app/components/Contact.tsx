@@ -167,21 +167,21 @@ export default function Contact() {
                       <option value="loop-10s" className="bg-primary-purple text-white">Loop Animation (10s) — R$300</option>
                     ) : formData.project === 'motion-design' ? (
                       <>
-                        <option value="rapido-15s" className="bg-primary-purple text-white">Rápido (15s) — R$250</option>
-                        <option value="curto-30s" className="bg-primary-purple text-white">Curto (30s) — R$420</option>
-                        <option value="medio-1min" className="bg-primary-purple text-white">Médio (1 min) — R$750</option>
-                        <option value="longo-2min" className="bg-primary-purple text-white">Longo (2 min) — R$1.380</option>
-                        <option value="estendido-3min" className="bg-primary-purple text-white">Estendido (3 min) — R$1.950</option>
-                        <option value="completo-5min" className="bg-primary-purple text-white">Completo (5 min) — R$3.200</option>
+                        <option value="rapido-15s" className="bg-primary-purple text-white">Rápido (15s) — R$180</option>
+                        <option value="curto-30s" className="bg-primary-purple text-white">Curto (30s) — R$325</option>
+                        <option value="medio-1min" className="bg-primary-purple text-white">Médio (1 min) — R$600</option>
+                        <option value="longo-2min" className="bg-primary-purple text-white">Longo (2 min) — R$1.100</option>
+                        <option value="estendido-3min" className="bg-primary-purple text-white">Estendido (3 min) — R$1.600</option>
+                        <option value="completo-5min" className="bg-primary-purple text-white">Completo (5 min) — R$2.500</option>
                       </>
                     ) : formData.project === 'outro' ? (
                       <option value="flexivel" className="bg-primary-purple text-white">O preço é flexível, variando conforme as especificações do projeto.</option>
                     ) : (
                       <>
-                        <option value="rapido-15s" className="bg-primary-purple text-white">Rápido (15s) — R$180</option>
-                        <option value="curto-30s" className="bg-primary-purple text-white">Curto (30s) — R$325</option>
-                        <option value="medio-1min" className="bg-primary-purple text-white">Médio (1 min) — R$600</option>
-                        <option value="longo-2min" className="bg-primary-purple text-white">Longo (2 min) — R$1.350</option>
+                        <option value="rapido-15s" className="bg-primary-purple text-white">Rápido (15s) — R$150</option>
+                        <option value="curto-30s" className="bg-primary-purple text-white">Curto (30s) — R$300</option>
+                        <option value="medio-1min" className="bg-primary-purple text-white">Médio (1 min) — R$620</option>
+                        <option value="longo-2min" className="bg-primary-purple text-white">Longo (2 min) — R$1.300</option>
                       </>
                     )}
                   </select>
