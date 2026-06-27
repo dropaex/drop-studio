@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import { smoothScrollTo } from '../smoothScroll';
 
 interface NavigationProps {
   currentSection: string;
@@ -19,17 +20,8 @@ export default function Navigation({ currentSection }: NavigationProps) {
   }, []);
 
   const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const yOffset = -80;
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      
-      window.scrollTo({
-        top: y,
-        behavior: 'smooth'
-      });
-      setIsMenuOpen(false);
-    }
+    smoothScrollTo(sectionId);
+    setIsMenuOpen(false);
   };
 
   const navigationItems = [
@@ -41,11 +33,13 @@ export default function Navigation({ currentSection }: NavigationProps) {
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled 
-        ? 'bg-gradient-to-r from-primary-purple/95 to-primary-purple-light/95 backdrop-blur-md shadow-xl shadow-primary-purple/20' 
-        : 'bg-gradient-to-r from-primary-purple/80 to-primary-purple-light/80 backdrop-blur-sm'
-    }`}>
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled
+          ? 'bg-gradient-to-r from-primary-purple/95 to-primary-purple-light/95 backdrop-blur-md shadow-xl shadow-primary-purple/20'
+          : 'bg-gradient-to-r from-primary-purple/80 to-primary-purple-light/80 backdrop-blur-sm'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <button
@@ -53,9 +47,10 @@ export default function Navigation({ currentSection }: NavigationProps) {
             className="transition-transform hover:scale-105 relative group"
           >
             <div className="absolute -inset-2 bg-gradient-to-r from-primary-blue/30 to-primary-purple/30 rounded-lg opacity-0 group-hover:opacity-100 blur transition-opacity"></div>
-            <img 
-              src="https://mocha-cdn.com/0199ca3f-5871-7d40-b087-febfeb43f048/imagem_2025-10-09_235545032-remov111ebg-previe1w-(1).png" 
-              alt="Drop Studio" 
+
+            <img
+              src="https://mocha-cdn.com/0199ca3f-5871-7d40-b087-febfeb43f048/imagem_2025-10-09_235545032-remov111ebg-previe1w-(1).png"
+              alt="Drop Studio"
               className="h-16 w-auto relative z-10"
             />
           </button>
