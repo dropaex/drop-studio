@@ -128,7 +128,7 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
         const angle = Math.atan2(dy, dx);
 
         // BASE menor: r=7
-        const BASE = 7;
+        const BASE = 11;
         // Stretch exagerado no voo: eixo longo até 3.5x, eixo curto até 0.4x
         const longAxis  = BASE * (1 + speed * 2.5);
         const shortAxis = BASE * Math.max(0.35, 1 - speed * 0.65);
@@ -163,11 +163,11 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
       const bounceOscillate = Math.sin(bounceT * Math.PI * 4) * bounceDecay;
 
       // BASE menor em hold: r=7
-      const BASE = 7;
-      // Squash do scroll: quanto mais rápido o scroll, mais achatada verticalmente
-      const scrollSquash = Math.abs(scrollVelocity) * 0.18; // exagerado
-      const holdRX = BASE * (1.0 + bounceOscillate * 0.8 + scrollSquash);
-      const holdRY = BASE * (1.0 - bounceOscillate * 0.5 - scrollSquash * 0.6);
+      const BASE = 11;
+      // Squash do scroll: estica verticalmente e achata horizontalmente
+      const scrollStretch = Math.abs(scrollVelocity) * 0.22; // exagerado
+      const holdRX = BASE * (1.0 + bounceOscillate * 0.8 - scrollStretch * 0.55);
+      const holdRY = BASE * (1.0 - bounceOscillate * 0.5 + scrollStretch * 1.4);
 
       for (const orb of orbs) {
         orb.y += scrollDelta * 0.07;
@@ -189,7 +189,7 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
       const t = Math.min((ts - startTime) / FADE_DURATION, 1);
       const alpha = 1 - easeInOut(t);
       // Estica verticalmente ao sumir como se estivesse sendo puxada pra baixo
-      const BASE = 7;
+      const BASE = 11;
       const rx = BASE * (1 + t * 0.4);
       const ry = BASE * (1 + t * 3.5);
 
