@@ -48,8 +48,8 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
 
   // Posições finais nos cantos (fixas na tela)
   const targets = [
-    { x: W * 0.18, y: H * 0.42 },   // meio-esquerda
-    { x: W * 0.82, y: H * 0.42 },   // meio-direita
+    { x: W * 0.08, y: H * 0.42 },   // lateral-esquerda
+    { x: W * 0.92, y: H * 0.42 },   // lateral-direita
   ];
 
   // Estado das bolinhas
@@ -82,37 +82,48 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
   }
 
-  function drawOrb(x: number, y: number, alpha: number, scale: number) {
+  // angle: direção do movimento (em radianos) para squash & stretch
+  // stretchX: quanto esticar no eixo do movimento (>1 = oval no sentido do voo)
+  // stretchY: quanto achatar perpendicular
+  function drawOrb(x: number, y: number, alpha: number, scale: number, angle = 0, stretchX = 1, stretchY = 1) {
     ctx.save();
     ctx.globalAlpha = alpha;
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+
     ctx.shadowBlur = 55;
     ctx.shadowColor = '#9333EA';
 
-    // Glow externo grande
-    const glow = ctx.createRadialGradient(x, y, 0, x, y, 28 * scale);
-    glow.addColorStop(0,   'rgba(168,85,247,0.35)');
+    // Glow externo — esticado na direção do movimento
+    ctx.save();
+    ctx.scale(stretchX, stretchY);
+    const glowR = 28 * scale;
+    const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, glowR);
+    glow.addColorStop(0,   'rgba(168,85,247,0.4)');
     glow.addColorStop(0.5, 'rgba(99,102,241,0.15)');
     glow.addColorStop(1,   'rgba(99,102,241,0)');
     ctx.beginPath();
-    ctx.arc(x, y, 28 * scale, 0, Math.PI * 2);
+    ctx.arc(0, 0, glowR, 0, Math.PI * 2);
     ctx.fillStyle = glow;
     ctx.fill();
 
-    // Corpo da bolinha
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, 12 * scale);
+    // Corpo — oval no sentido do voo
+    const r = 12 * scale;
+    const grad = ctx.createRadialGradient(-r * 0.3, -r * 0.3, 0, 0, 0, r);
     grad.addColorStop(0,   '#F0ABFC');
     grad.addColorStop(0.4, '#A855F7');
     grad.addColorStop(1,   '#6366F1');
     ctx.beginPath();
-    ctx.arc(x, y, 12 * scale, 0, Math.PI * 2);
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
     ctx.fillStyle = grad;
     ctx.fill();
+    ctx.restore();
 
-    // Brilho interno
+    // Brilho interno (não esticado, fica circular)
     ctx.globalAlpha = alpha * 0.65;
     ctx.fillStyle = 'white';
     ctx.beginPath();
-    ctx.arc(x - 3 * scale, y - 3 * scale, 3 * scale, 0, Math.PI * 2);
+    ctx.arc(-3 * scale, -3 * scale, 3 * scale, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();
@@ -126,13 +137,24 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
     if (phase === 'flying') {
       const t = Math.min(elapsed / ORB_DURATION, 1);
       const eased = easeOut(t);
+      // Velocidade normalizada para calcular o stretch (mais rápido = mais oval)
+      const speed = Math.max(0, 1 - t); // desacelera no final
 
       for (const orb of orbs) {
         orb.x = originX + (orb.tx - originX) * eased;
         orb.y = originY + (orb.ty - originY) * eased;
-        // Scale cresce levemente ao chegar
         orb.scale = 1 + 1.2 * eased;
-        drawOrb(orb.x, orb.y, 1, orb.scale);
+
+        // Ângulo da direção de voo
+        const dx = orb.tx - originX;
+        const dy = orb.ty - originY;
+        const angle = Math.atan2(dy, dx);
+
+        // Stretch: estica na direção do voo, achata perpendicular
+        const stretchX = 1 + speed * 1.8;  // oval no sentido do movimento
+        const stretchY = 1 - speed * 0.45; // achata perpendicular
+
+        drawOrb(orb.x, orb.y, 1, orb.scale, angle, stretchX, stretchY);
       }
 
       if (t >= 1) {
@@ -145,19 +167,27 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
       const holdElapsed = ts - holdStart;
       const holdT = holdElapsed / HOLD_DURATION;
 
-      // Acompanha o scroll — bolinha fica "presa" na tela mas com leve overshoot
       const scrollDelta = window.scrollY - lastScrollY;
       lastScrollY = window.scrollY;
 
-      // Escala pulsa levemente simulando "esticando"
-      const stretch = 2.2 + 0.6 * Math.sin(holdElapsed * 0.006);
+      // Bounce de squash ao chegar: nos primeiros 400ms faz um squash-stretch
+      const bounceT = Math.min(holdElapsed / 400, 1);
+      // Squash inicial (achatado verticalmente), depois normaliza com bounce
+      const bounceSquash = bounceT < 0.4
+        ? 1 - (1 - bounceT / 0.4) * 0.5   // achata ao chegar
+        : 0.5 + ((bounceT - 0.4) / 0.6) * 0.5 + 0.1 * Math.sin((bounceT - 0.4) / 0.6 * Math.PI * 3) * (1 - bounceT); // bounce de volta
+      const bounceStretch = bounceT < 0.4
+        ? 1 + (1 - bounceT / 0.4) * 0.7   // estica ao achatar
+        : 1 + 0.08 * Math.sin((bounceT - 0.4) / 0.6 * Math.PI * 3) * (1 - bounceT);
+
+      // Pulso suave depois do bounce
+      const pulse = 2.2 + 0.3 * Math.sin(holdElapsed * 0.005);
 
       for (const orb of orbs) {
-        // Bolinha segue a tela (fixed), mas com pequeno overshoot vertical
-        orb.y += scrollDelta * 0.08; // leve arrasto
-        // Clamp para não sair da tela
+        orb.y += scrollDelta * 0.08;
         orb.y = Math.max(20, Math.min(H - 20, orb.y));
-        drawOrb(orb.x, orb.y, 1, stretch);
+        // Squash = achata no eixo Y, estica no X (horizontal ao chegar)
+        drawOrb(orb.x, orb.y, 1, pulse, 0, bounceStretch, bounceSquash);
       }
 
       // Dispara scroll cedo
