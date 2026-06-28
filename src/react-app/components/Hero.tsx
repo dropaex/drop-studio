@@ -48,8 +48,8 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
 
   // Posições finais nos cantos (fixas na tela)
   const targets = [
-    { x: 40,     y: 40 },      // top-left
-    { x: W - 40, y: 40 },      // top-right
+    { x: W * 0.18, y: H * 0.42 },   // meio-esquerda
+    { x: W * 0.82, y: H * 0.42 },   // meio-direita
   ];
 
   // Estado das bolinhas
@@ -89,22 +89,22 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
     ctx.shadowColor = '#9333EA';
 
     // Glow externo grande
-    const glow = ctx.createRadialGradient(x, y, 0, x, y, 44 * scale);
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, 28 * scale);
     glow.addColorStop(0,   'rgba(168,85,247,0.35)');
     glow.addColorStop(0.5, 'rgba(99,102,241,0.15)');
     glow.addColorStop(1,   'rgba(99,102,241,0)');
     ctx.beginPath();
-    ctx.arc(x, y, 44 * scale, 0, Math.PI * 2);
+    ctx.arc(x, y, 28 * scale, 0, Math.PI * 2);
     ctx.fillStyle = glow;
     ctx.fill();
 
     // Corpo da bolinha
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, 20 * scale);
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, 12 * scale);
     grad.addColorStop(0,   '#F0ABFC');
     grad.addColorStop(0.4, '#A855F7');
     grad.addColorStop(1,   '#6366F1');
     ctx.beginPath();
-    ctx.arc(x, y, 20 * scale, 0, Math.PI * 2);
+    ctx.arc(x, y, 12 * scale, 0, Math.PI * 2);
     ctx.fillStyle = grad;
     ctx.fill();
 
@@ -112,7 +112,7 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
     ctx.globalAlpha = alpha * 0.65;
     ctx.fillStyle = 'white';
     ctx.beginPath();
-    ctx.arc(x - 6 * scale, y - 6 * scale, 5 * scale, 0, Math.PI * 2);
+    ctx.arc(x - 3 * scale, y - 3 * scale, 3 * scale, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();
@@ -131,7 +131,7 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
         orb.x = originX + (orb.tx - originX) * eased;
         orb.y = originY + (orb.ty - originY) * eased;
         // Scale cresce levemente ao chegar
-        orb.scale = 1 + 0.3 * eased;
+        orb.scale = 1 + 1.2 * eased;
         drawOrb(orb.x, orb.y, 1, orb.scale);
       }
 
@@ -150,7 +150,7 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
       lastScrollY = window.scrollY;
 
       // Escala pulsa levemente simulando "esticando"
-      const stretch = 1.3 + 0.15 * Math.sin(holdElapsed * 0.008);
+      const stretch = 2.2 + 0.6 * Math.sin(holdElapsed * 0.006);
 
       for (const orb of orbs) {
         // Bolinha segue a tela (fixed), mas com pequeno overshoot vertical
@@ -175,7 +175,7 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
       const t = Math.min((ts - startTime) / FADE_DURATION, 1);
       const alpha = 1 - easeInOut(t);
       // Scale explode levemente ao sumir
-      const scale = 1.3 + t * 0.8;
+      const scale = 2.2 + t * 2.0;
 
       for (const orb of orbs) {
         drawOrb(orb.x, orb.y, alpha, scale);
