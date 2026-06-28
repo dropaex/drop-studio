@@ -113,10 +113,10 @@ export default function Contact() {
                       <option value="flexivel" className="bg-primary-purple text-white">O preço é flexível, variando conforme as especificações do projeto.</option>
                     ) : (
                       <>
-                        <option value="rapido-15s" className="bg-primary-purple text-white">Rápido (15s) — R$180</option>
-                        <option value="curto-30s" className="bg-primary-purple text-white">Curto (30s) — R$325</option>
+                        <option value="rapido-15s" className="bg-primary-purple text-white">Rápido (15s) — R$150</option>
+                        <option value="curto-30s" className="bg-primary-purple text-white">Curto (30s) — R$300</option>
                         <option value="medio-1min" className="bg-primary-purple text-white">Médio (1 min) — R$600</option>
-                        <option value="longo-2min" className="bg-primary-purple text-white">Longo (2 min) — R$1.350</option>
+                        <option value="longo-2min" className="bg-primary-purple text-white">Longo (2 min) — R$1.300</option>
                       </>
                     )}
                   </select>
