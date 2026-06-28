@@ -82,12 +82,14 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
     alpha: number,
     rx: number,   // raio X (para squash/stretch)
     ry: number,   // raio Y
-    angle = 0
+    angle = 0,
+    anchorOffsetX = 0  // desloca o centro para ancorar na ponta
   ) {
     ctx.save();
     ctx.globalAlpha = alpha;
-    ctx.translate(x, y);
+    ctx.translate(x - anchorOffsetX, y);
     ctx.rotate(angle);
+    ctx.translate(anchorOffsetX, 0);
 
     // Glow simples
     ctx.shadowBlur = 30;
@@ -166,13 +168,16 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
       const BASE = 11;
       // Squash do scroll: estica verticalmente e achata horizontalmente
       const scrollStretch = Math.abs(scrollVelocity) * 0.22; // exagerado
-      const holdRX = BASE * (1.0 + bounceOscillate * 0.8 - scrollStretch * 0.55);
+      const holdRX = BASE * Math.max(0.75, 1.0 + bounceOscillate * 0.8 - scrollStretch * 0.18);
       const holdRY = BASE * (1.0 - bounceOscillate * 0.5 + scrollStretch * 1.4);
 
       for (const orb of orbs) {
         orb.y += scrollDelta * 0.07;
         orb.y = Math.max(20, Math.min(H - 20, orb.y));
-        drawOrb(orb.x, orb.y, 1, Math.max(3, holdRX), Math.max(3, holdRY));
+        // Anchor na ponta: orb da esquerda ancora na ponta direita, direita ancora na ponta esquerda
+        const isLeft = orb.tx < W / 2;
+        const anchorOffsetX = isLeft ? holdRX : -holdRX;
+        drawOrb(orb.x - anchorOffsetX + anchorOffsetX, orb.y, 1, Math.max(3, holdRX), Math.max(3, holdRY), 0, isLeft ? holdRX : -holdRX);
       }
 
       if (!scrollTriggered && holdElapsed > 100) {
