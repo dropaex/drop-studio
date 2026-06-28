@@ -12,65 +12,38 @@ export default function Contact() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
+    e.preventDefault();
+    setIsLoading(true);
 
-  try {
-    const response = await fetch("/api/contact", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-    if (!response.ok) {
-      throw new Error("Erro ao enviar");
+      if (!response.ok) {
+        throw new Error("Erro ao enviar");
+      }
+
+      setIsSubmitted(true);
+
+      setFormData({
+        name: "",
+        project: "",
+        budget: "",
+        message: "",
+      });
+
+      setTimeout(() => setIsSubmitted(false), 3000);
+    } catch (error) {
+      alert("Erro ao enviar mensagem. Tente novamente.");
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsSubmitted(true);
-
-    setFormData({
-      name: "",
-      project: "",
-      budget: "",
-      message: "",
-    });
-
-    setTimeout(() => setIsSubmitted(false), 3000);
-  } catch (error) {
-    alert("Erro ao enviar mensagem. Tente novamente.");
-  } finally {
-    setIsLoading(false);
-};
-
-  try {
-    const response = await fetch("/api/contact", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-
-    if (!response.ok) {
-      throw new Error("Erro ao enviar");
-    }
-
-    setIsSubmitted(true);
-
-    setFormData({
-      name: "",
-      project: "",
-      budget: "",
-      message: "",
-    });
-
-    setTimeout(() => setIsSubmitted(false), 3000);
-  } catch (error) {
-    alert("Erro ao enviar mensagem. Tente novamente.");
-  }
-};
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -204,13 +177,13 @@ export default function Contact() {
                 </div>
 
                 <button
-  type="submit"
-  disabled={isLoading}
-  className="w-full bg-gradient-to-r from-primary-purple to-primary-purple-light text-white py-4 px-6 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-primary-purple/60 transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
->
-  <Send size={20} />
-  {isLoading ? "Enviando..." : "Enviar Mensagem"}
-</button>
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-primary-purple to-primary-purple-light text-white py-4 px-6 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-primary-purple/60 transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  <Send size={20} />
+                  {isLoading ? "Enviando..." : "Enviar Mensagem"}
+                </button>
               </form>
             )}
           </div>
@@ -249,12 +222,12 @@ export default function Contact() {
                   </div>
                 </div>
 
-                <a href="https://www.behance.net/drop_aex" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-4 bg-gradient-to-br from-primary-purple/50 to-primary-purple-light/50 backdrop-blur-sm p-5 rounded-xl transition-all duration-300 hover:scale-102 hover:shadow-2xl hover:shadow-primary-purple/50 border-2 border-primary-purple/60 animate-glow-pulse overflow-hidden relative group/behance">
+                <a href="https://www.behance.net/drop_aex" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-4 bg-gradient-to-br from-primary-purple/50 to-primary-purple-light/50 backdrop-blur-sm p-5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary-purple/50 border-2 border-primary-purple/60 animate-glow-pulse overflow-hidden relative group/behance">
                   <div className="absolute inset-0 -translate-x-full group-hover/behance:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12"></div>
                   <div className="bg-gradient-to-br from-primary-purple to-primary-purple-light p-5 rounded-xl shadow-xl shadow-primary-purple/50">
+                    {/* Behance real logo */}
                     <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M6.5 4.5h11v15h-11v-15zM8 6v12h8V6H8zm2.5 1.5h3v1.5h-3V7.5zm0 3h3V12h-3v-1.5zm0 3h3v1.5h-3V13.5z" />
-                      <path d="M22 7.5v9c0 1.381-1.119 2.5-2.5 2.5h-15C3.119 19 2 17.881 2 16.5v-9C2 6.119 3.119 5 4.5 5h15C20.881 5 22 6.119 22 7.5z" />
+                      <path d="M9.17 8.3c.38 0 .72.04 1.03.12.31.08.57.21.79.38.22.18.39.4.51.68.12.28.18.61.18.99 0 .42-.1.78-.3 1.07-.2.28-.49.52-.87.71.52.15.91.41 1.17.79.26.38.39.84.39 1.38 0 .42-.08.79-.24 1.11-.16.32-.38.58-.66.8-.28.21-.6.37-.97.47-.37.1-.75.15-1.16.15H5V8.3h4.17zm-.27 3.51c.34 0 .62-.08.84-.25.22-.17.33-.43.33-.79 0-.2-.04-.36-.11-.49-.07-.13-.17-.23-.29-.31-.12-.07-.26-.13-.41-.16-.16-.03-.32-.04-.49-.04H6.8v2.04h2.1zm.1 3.68c.19 0 .37-.02.54-.06.17-.04.31-.11.44-.2.13-.09.22-.21.3-.36.07-.15.11-.33.11-.55 0-.44-.13-.76-.38-.96-.25-.2-.59-.3-1.01-.3H6.8v2.43h2.2zm5.87-.05c.25.24.61.36 1.08.36.34 0 .63-.08.87-.26.25-.17.4-.36.46-.55h1.48c-.24.73-.6 1.26-1.09 1.57-.49.31-1.08.47-1.77.47-.48 0-.91-.08-1.29-.23-.38-.15-.7-.37-.97-.65-.26-.28-.47-.62-.61-1.01-.14-.39-.21-.82-.21-1.29 0-.45.07-.87.22-1.26.15-.38.36-.72.63-1 .27-.28.59-.5.97-.66.38-.16.79-.24 1.24-.24.5 0 .95.1 1.33.29.38.19.69.45.94.78.25.32.43.7.54 1.11.11.41.15.85.12 1.3h-4.4c0 .49.16.88.46 1.27zm1.87-3.42c-.21-.23-.54-.34-.97-.34-.28 0-.52.05-.71.14-.19.1-.34.22-.46.36-.12.14-.2.29-.25.45-.05.16-.08.31-.09.44h2.85c-.06-.45-.19-.82-.37-1.05zm-3.1-4.22h3.73v.88h-3.73v-.88z"/>
                     </svg>
                   </div>
                   <div className="flex-1">

@@ -1,5 +1,5 @@
 {
-  "name": "mocha-app",
+  "name": "dropstudio-productions",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -19,6 +19,7 @@
     "zod": "^3.24.3"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250525.0",
     "@eslint/js": "9.25.1",
     "@getmocha/users-service": "^0.0.4",
     "@getmocha/vite-plugins": "^3.0.17",
