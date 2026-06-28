@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
-import { smoothScrollTo } from '../smoothScroll';
 
 interface NavigationProps {
   currentSection: string;
@@ -20,7 +19,12 @@ export default function Navigation({ currentSection }: NavigationProps) {
   }, []);
 
   const scrollToSection = (sectionId: string) => {
-    smoothScrollTo(sectionId);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const yOffset = -80;
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
     setIsMenuOpen(false);
   };
 
@@ -47,7 +51,6 @@ export default function Navigation({ currentSection }: NavigationProps) {
             className="transition-transform hover:scale-105 relative group"
           >
             <div className="absolute -inset-2 bg-gradient-to-r from-primary-blue/30 to-primary-purple/30 rounded-lg opacity-0 group-hover:opacity-100 blur transition-opacity"></div>
-
             <img
               src="https://mocha-cdn.com/0199ca3f-5871-7d40-b087-febfeb43f048/imagem_2025-10-09_235545032-remov111ebg-previe1w-(1).png"
               alt="Drop Studio"
