@@ -26,38 +26,58 @@ function spawnParticles(e: React.MouseEvent<HTMLButtonElement>) {
   const ctx = canvas.getContext('2d')!;
   const colors = ['#9333EA', '#A855F7', '#6366F1', '#C084FC', '#E879F9', '#ffffff'];
 
-  const particles: Particle[] = Array.from({ length: 60 }, () => {
+  const particles: Particle[] = Array.from({ length: 80 }, () => {
     const angle = Math.random() * Math.PI * 2;
-    const speed = Math.random() * 8 + 3;
+    const speed = Math.random() * 12 + 4;
     return {
       x: e.clientX,
       y: e.clientY,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       life: 1,
-      size: Math.random() * 6 + 2,
+      size: Math.random() * 7 + 2,
       color: colors[Math.floor(Math.random() * colors.length)],
     };
   });
+
+  // Ripple
+  let rippleRadius = 0;
+  let rippleAlpha = 0.8;
 
   let animId: number;
 
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Desenha o ripple
+    if (rippleAlpha > 0) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(e.clientX, e.clientY, rippleRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(168, 85, 247, ${rippleAlpha})`;
+      ctx.lineWidth = 3;
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#9333EA';
+      ctx.stroke();
+      ctx.restore();
+      rippleRadius += 6;
+      rippleAlpha -= 0.04;
+    }
+
+    // Desenha as partículas
     let alive = false;
     for (const p of particles) {
       p.x += p.vx;
       p.y += p.vy;
-      p.vy += 0.15; // gravity
-      p.vx *= 0.98;
-      p.life -= 0.022;
+      p.vy += 0.2;
+      p.vx *= 0.97;
+      p.life -= 0.018;
 
       if (p.life > 0) {
         alive = true;
         ctx.save();
         ctx.globalAlpha = p.life;
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 15;
         ctx.shadowColor = p.color;
         ctx.fillStyle = p.color;
         ctx.beginPath();
@@ -67,7 +87,7 @@ function spawnParticles(e: React.MouseEvent<HTMLButtonElement>) {
       }
     }
 
-    if (alive) {
+    if (alive || rippleAlpha > 0) {
       animId = requestAnimationFrame(draw);
     } else {
       cancelAnimationFrame(animId);
@@ -79,22 +99,33 @@ function spawnParticles(e: React.MouseEvent<HTMLButtonElement>) {
 }
 
 function smoothScrollTo(id: string) {
+  const lenis = (window as any).__lenis__;
   const element = document.getElementById(id);
   if (!element) return;
-  const yOffset = -80;
-  const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-  window.scrollTo({ top: y, behavior: 'smooth' });
+
+  if (lenis) {
+    // Usa o Lenis para scroll animado
+    lenis.scrollTo(element, {
+      offset: -80,
+      duration: 2.4,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    });
+  } else {
+    // Fallback
+    const y = element.getBoundingClientRect().top + window.pageYOffset - 80;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  }
 }
 
 export default function Hero() {
   const handlePortfolio = (e: React.MouseEvent<HTMLButtonElement>) => {
     spawnParticles(e);
-    setTimeout(() => smoothScrollTo('portfolio'), 100);
+    setTimeout(() => smoothScrollTo('portfolio'), 80);
   };
 
   const handleContact = (e: React.MouseEvent<HTMLButtonElement>) => {
     spawnParticles(e);
-    setTimeout(() => smoothScrollTo('contato'), 100);
+    setTimeout(() => smoothScrollTo('contato'), 80);
   };
 
   return (
@@ -120,7 +151,6 @@ export default function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-            {/* Ver Portfólio */}
             <button
               onClick={handlePortfolio}
               className="group relative bg-gradient-to-r from-primary-purple to-primary-purple-light text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-primary-purple/60 transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105 overflow-hidden"
@@ -130,7 +160,6 @@ export default function Hero() {
               <ArrowRight size={20} className="relative group-hover:translate-x-1 transition-transform" />
             </button>
 
-            {/* Solicitar Orçamento */}
             <button
               onClick={handleContact}
               className="relative bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-primary-purple/20 transition-all duration-300 hover:scale-105 overflow-hidden"
@@ -142,7 +171,7 @@ export default function Hero() {
       </div>
 
       <button
-        onClick={(e) => { spawnParticles(e); setTimeout(() => smoothScrollTo('portfolio'), 100); }}
+        onClick={(e) => { spawnParticles(e); setTimeout(() => smoothScrollTo('portfolio'), 80); }}
         className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-10 text-primary-purple-light hover:text-white transition-colors bg-primary-purple/20 rounded-full p-3"
       >
         <ChevronDown size={32} />
