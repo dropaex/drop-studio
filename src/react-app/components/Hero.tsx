@@ -1,16 +1,39 @@
 import { ChevronDown, ArrowRight } from 'lucide-react';
 
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  life: number;
-  size: number;
-  color: string;
+function smoothScrollTo(id: string) {
+  const lenis = (window as any).__lenis__;
+  const element = document.getElementById(id);
+  if (!element) return;
+
+  if (lenis) {
+    lenis.scrollTo(element, {
+      offset: -80,
+      duration: 2.4,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    });
+  } else {
+    const y = element.getBoundingClientRect().top + window.pageYOffset - 80;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  }
 }
 
-function spawnParticles(e: React.MouseEvent<HTMLButtonElement>) {
+function launchOrbsAndScroll(
+  e: React.MouseEvent<HTMLButtonElement>,
+  targetId: string
+) {
+  const btn = e.currentTarget.getBoundingClientRect();
+  const originX = btn.left + btn.width / 2;
+  const originY = btn.top + btn.height / 2;
+
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  // Dois cantos: top-left e top-right
+  const corners = [
+    { tx: 0, ty: 0 },
+    { tx: W, ty: 0 },
+  ];
+
   const canvas = document.createElement('canvas');
   canvas.style.cssText = `
     position: fixed;
@@ -19,113 +42,192 @@ function spawnParticles(e: React.MouseEvent<HTMLButtonElement>) {
     pointer-events: none;
     z-index: 9999;
   `;
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = W;
+  canvas.height = H;
   document.body.appendChild(canvas);
-
   const ctx = canvas.getContext('2d')!;
-  const colors = ['#9333EA', '#A855F7', '#6366F1', '#C084FC', '#E879F9', '#ffffff'];
 
-  const particles: Particle[] = Array.from({ length: 80 }, () => {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = Math.random() * 12 + 4;
-    return {
-      x: e.clientX,
-      y: e.clientY,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      life: 1,
-      size: Math.random() * 7 + 2,
-      color: colors[Math.floor(Math.random() * colors.length)],
-    };
-  });
+  // Estado das bolinhas
+  const orbs = corners.map((c) => ({
+    x: originX,
+    y: originY,
+    tx: c.tx,
+    ty: c.ty,
+    progress: 0,
+  }));
 
-  // Ripple
-  let rippleRadius = 0;
-  let rippleAlpha = 0.8;
+  // Skew na página
+  const appEl = document.getElementById('root') as HTMLElement;
+  let skewProgress = 0; // 0 → 1 → 0
+  let phase: 'skewIn' | 'hold' | 'skewOut' | 'done' = 'skewIn';
+  const MAX_SKEW = 8; // graus
+  let scrollTriggered = false;
 
   let animId: number;
+  let startTime: number | null = null;
+  const ORB_DURATION = 700; // ms para as bolinhas chegarem aos cantos
+  const HOLD_DURATION = 200; // ms segurando nos cantos
+  const SKEW_IN = 250;
+  const SKEW_OUT = 350;
 
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  function easeInOut(t: number) {
+    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+  }
 
-    // Desenha o ripple
-    if (rippleAlpha > 0) {
-      ctx.save();
+  function draw(ts: number) {
+    if (!startTime) startTime = ts;
+    const elapsed = ts - startTime;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // --- Bolinhas ---
+    const orbT = Math.min(elapsed / ORB_DURATION, 1);
+    const orbEased = easeInOut(orbT);
+
+    for (const orb of orbs) {
+      orb.progress = orbEased;
+      const cx = originX + (orb.tx - originX) * orbEased;
+      const cy = originY + (orb.ty - originY) * orbEased;
+
+      // Trilha
+      const trail = ctx.createRadialGradient(cx, cy, 0, cx, cy, 40);
+      trail.addColorStop(0, 'rgba(168,85,247,0.18)');
+      trail.addColorStop(1, 'rgba(168,85,247,0)');
       ctx.beginPath();
-      ctx.arc(e.clientX, e.clientY, rippleRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(168, 85, 247, ${rippleAlpha})`;
-      ctx.lineWidth = 3;
-      ctx.shadowBlur = 20;
+      ctx.arc(cx, cy, 40, 0, Math.PI * 2);
+      ctx.fillStyle = trail;
+      ctx.fill();
+
+      // Glow externo
+      ctx.save();
+      ctx.shadowBlur = 60;
       ctx.shadowColor = '#9333EA';
-      ctx.stroke();
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 22);
+      grad.addColorStop(0, '#E879F9');
+      grad.addColorStop(0.4, '#A855F7');
+      grad.addColorStop(1, '#6366F1');
+      ctx.beginPath();
+      ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
       ctx.restore();
-      rippleRadius += 6;
-      rippleAlpha -= 0.04;
+
+      // Brilho interno
+      ctx.save();
+      ctx.globalAlpha = 0.7;
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(cx - 6, cy - 6, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     }
 
-    // Desenha as partículas
-    let alive = false;
-    for (const p of particles) {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += 0.2;
-      p.vx *= 0.97;
-      p.life -= 0.018;
+    // --- Skew na página ---
+    if (phase === 'skewIn') {
+      skewProgress = Math.min(elapsed / SKEW_IN, 1);
+      const skewDeg = easeInOut(skewProgress) * MAX_SKEW;
+      appEl.style.transform = `skewX(${skewDeg}deg)`;
+      appEl.style.transition = 'none';
+      if (skewProgress >= 1) {
+        phase = 'hold';
+        startTime = ts; // reset timer para hold
+      }
+    } else if (phase === 'hold') {
+      const holdElapsed = ts - startTime;
 
-      if (p.life > 0) {
-        alive = true;
+      // Dispara scroll no meio do hold
+      if (!scrollTriggered && holdElapsed > HOLD_DURATION * 0.3) {
+        scrollTriggered = true;
+        smoothScrollTo(targetId);
+      }
+
+      if (holdElapsed >= HOLD_DURATION) {
+        phase = 'skewOut';
+        startTime = ts;
+      }
+    } else if (phase === 'skewOut') {
+      const outElapsed = ts - startTime;
+      skewProgress = 1 - Math.min(outElapsed / SKEW_OUT, 1);
+      const skewDeg = easeInOut(skewProgress) * MAX_SKEW;
+      appEl.style.transform = `skewX(${skewDeg}deg)`;
+      if (skewProgress <= 0) {
+        appEl.style.transform = '';
+        phase = 'done';
+      }
+    }
+
+    // Fade out das bolinhas quando chegam ao canto
+    if (orbT >= 1) {
+      // Pulsa nos cantos enquanto faz skew
+      for (const orb of orbs) {
+        const pulse = 1 + 0.2 * Math.sin(ts * 0.01);
+        const cx = orb.tx === 0 ? 22 : W - 22;
+        const cy = 22;
+
         ctx.save();
-        ctx.globalAlpha = p.life;
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = p.color;
-        ctx.fillStyle = p.color;
+        ctx.shadowBlur = 80;
+        ctx.shadowColor = '#9333EA';
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 22 * pulse);
+        grad.addColorStop(0, '#E879F9');
+        grad.addColorStop(0.4, '#A855F7');
+        grad.addColorStop(1, '#6366F1');
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+        ctx.arc(cx, cy, 22 * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
         ctx.fill();
         ctx.restore();
       }
     }
 
-    if (alive || rippleAlpha > 0) {
+    if (phase !== 'done') {
       animId = requestAnimationFrame(draw);
     } else {
+      // Fade out bolinhas
+      let fadeAlpha = 1;
+      function fadeOut(ts2: number) {
+        ctx.clearRect(0, 0, W, H);
+        fadeAlpha -= 0.06;
+        if (fadeAlpha > 0) {
+          for (const orb of orbs) {
+            const cx = orb.tx === 0 ? 22 : W - 22;
+            const cy = 22;
+            ctx.save();
+            ctx.globalAlpha = fadeAlpha;
+            ctx.shadowBlur = 60;
+            ctx.shadowColor = '#9333EA';
+            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 22);
+            grad.addColorStop(0, '#E879F9');
+            grad.addColorStop(1, '#6366F1');
+            ctx.beginPath();
+            ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.restore();
+          }
+          requestAnimationFrame(fadeOut);
+        } else {
+          document.body.removeChild(canvas);
+        }
+      }
+      requestAnimationFrame(fadeOut);
       cancelAnimationFrame(animId);
-      document.body.removeChild(canvas);
     }
   }
 
   animId = requestAnimationFrame(draw);
 }
 
-function smoothScrollTo(id: string) {
-  const lenis = (window as any).__lenis__;
-  const element = document.getElementById(id);
-  if (!element) return;
-
-  if (lenis) {
-    // Usa o Lenis para scroll animado
-    lenis.scrollTo(element, {
-      offset: -80,
-      duration: 2.4,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    });
-  } else {
-    // Fallback
-    const y = element.getBoundingClientRect().top + window.pageYOffset - 80;
-    window.scrollTo({ top: y, behavior: 'smooth' });
-  }
+function applyClickSkew(e: React.MouseEvent<HTMLButtonElement>, targetId: string) {
+  launchOrbsAndScroll(e, targetId);
 }
 
 export default function Hero() {
   const handlePortfolio = (e: React.MouseEvent<HTMLButtonElement>) => {
-    spawnParticles(e);
-    setTimeout(() => smoothScrollTo('portfolio'), 80);
+    applyClickSkew(e, 'portfolio');
   };
 
   const handleContact = (e: React.MouseEvent<HTMLButtonElement>) => {
-    spawnParticles(e);
-    setTimeout(() => smoothScrollTo('contato'), 80);
+    applyClickSkew(e, 'contato');
   };
 
   return (
@@ -171,7 +273,7 @@ export default function Hero() {
       </div>
 
       <button
-        onClick={(e) => { spawnParticles(e); setTimeout(() => smoothScrollTo('portfolio'), 80); }}
+        onClick={(e) => applyClickSkew(e, 'portfolio')}
         className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-10 text-primary-purple-light hover:text-white transition-colors bg-primary-purple/20 rounded-full p-3"
       >
         <ChevronDown size={32} />
