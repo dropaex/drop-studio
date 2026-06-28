@@ -46,84 +46,64 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
   document.body.appendChild(canvas);
   const ctx = canvas.getContext('2d')!;
 
-  // Posições finais nos cantos (fixas na tela)
   const targets = [
-    { x: W * 0.08, y: H * 0.42 },   // lateral-esquerda
-    { x: W * 0.92, y: H * 0.42 },   // lateral-direita
+    { x: W * 0.06, y: H * 0.44 },
+    { x: W * 0.94, y: H * 0.44 },
   ];
 
-  // Estado das bolinhas
   const orbs = targets.map((t) => ({
     x: originX,
     y: originY,
     tx: t.x,
     ty: t.y,
     scale: 1,
-    alpha: 1,
   }));
 
-  const ORB_DURATION  = 550;   // ms voando até o canto
-  const HOLD_DURATION = 1800;  // ms ficando nos cantos (acompanha scroll)
-  const FADE_DURATION = 500;   // ms sumindo
+  const ORB_DURATION  = 520;
+  const HOLD_DURATION = 1800;
+  const FADE_DURATION = 480;
 
   let startTime: number | null = null;
   let phase: 'flying' | 'holding' | 'fading' = 'flying';
   let holdStart = 0;
   let scrollTriggered = false;
-
-  // Scroll acumulado durante o hold, para acompanhar a página
   let lastScrollY = window.scrollY;
 
-  function easeOut(t: number) {
-    return 1 - Math.pow(1 - t, 3);
-  }
+  // Squash durante o scroll — acumula velocidade de scroll
+  let scrollVelocity = 0;
+  let prevScrollY = window.scrollY;
 
-  function easeInOut(t: number) {
-    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-  }
+  function easeOut(t: number) { return 1 - Math.pow(1 - t, 3); }
+  function easeInOut(t: number) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
 
-  // angle: direção do movimento (em radianos) para squash & stretch
-  // stretchX: quanto esticar no eixo do movimento (>1 = oval no sentido do voo)
-  // stretchY: quanto achatar perpendicular
-  function drawOrb(x: number, y: number, alpha: number, scale: number, angle = 0, stretchX = 1, stretchY = 1) {
+  // Bolinha simples: círculo sólido roxo com glow, sem gradiente complexo
+  function drawOrb(
+    x: number, y: number,
+    alpha: number,
+    rx: number,   // raio X (para squash/stretch)
+    ry: number,   // raio Y
+    angle = 0
+  ) {
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.translate(x, y);
     ctx.rotate(angle);
 
-    ctx.shadowBlur = 55;
-    ctx.shadowColor = '#9333EA';
+    // Glow simples
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = '#A855F7';
 
-    // Glow externo — esticado na direção do movimento
-    ctx.save();
-    ctx.scale(stretchX, stretchY);
-    const glowR = 28 * scale;
-    const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, glowR);
-    glow.addColorStop(0,   'rgba(168,85,247,0.4)');
-    glow.addColorStop(0.5, 'rgba(99,102,241,0.15)');
-    glow.addColorStop(1,   'rgba(99,102,241,0)');
+    // Corpo elíptico
     ctx.beginPath();
-    ctx.arc(0, 0, glowR, 0, Math.PI * 2);
-    ctx.fillStyle = glow;
+    ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#A855F7';
     ctx.fill();
 
-    // Corpo — oval no sentido do voo
-    const r = 12 * scale;
-    const grad = ctx.createRadialGradient(-r * 0.3, -r * 0.3, 0, 0, 0, r);
-    grad.addColorStop(0,   '#F0ABFC');
-    grad.addColorStop(0.4, '#A855F7');
-    grad.addColorStop(1,   '#6366F1');
+    // Brilho interno pequeno
+    ctx.globalAlpha = alpha * 0.5;
+    ctx.fillStyle = '#E9D5FF';
     ctx.beginPath();
-    ctx.arc(0, 0, r, 0, Math.PI * 2);
-    ctx.fillStyle = grad;
-    ctx.fill();
-    ctx.restore();
-
-    // Brilho interno (não esticado, fica circular)
-    ctx.globalAlpha = alpha * 0.65;
-    ctx.fillStyle = 'white';
-    ctx.beginPath();
-    ctx.arc(-3 * scale, -3 * scale, 3 * scale, 0, Math.PI * 2);
+    ctx.ellipse(-rx * 0.25, -ry * 0.25, rx * 0.3, ry * 0.3, 0, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();
@@ -137,61 +117,65 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
     if (phase === 'flying') {
       const t = Math.min(elapsed / ORB_DURATION, 1);
       const eased = easeOut(t);
-      // Velocidade normalizada para calcular o stretch (mais rápido = mais oval)
-      const speed = Math.max(0, 1 - t); // desacelera no final
+      const speed = 1 - t; // 1 no início, 0 no fim
 
       for (const orb of orbs) {
         orb.x = originX + (orb.tx - originX) * eased;
         orb.y = originY + (orb.ty - originY) * eased;
-        orb.scale = 1 + 1.2 * eased;
 
-        // Ângulo da direção de voo
         const dx = orb.tx - originX;
         const dy = orb.ty - originY;
         const angle = Math.atan2(dy, dx);
 
-        // Stretch: estica na direção do voo, achata perpendicular
-        const stretchX = 1 + speed * 1.8;  // oval no sentido do movimento
-        const stretchY = 1 - speed * 0.45; // achata perpendicular
+        // BASE menor: r=7
+        const BASE = 7;
+        // Stretch exagerado no voo: eixo longo até 3.5x, eixo curto até 0.4x
+        const longAxis  = BASE * (1 + speed * 2.5);
+        const shortAxis = BASE * Math.max(0.35, 1 - speed * 0.65);
 
-        drawOrb(orb.x, orb.y, 1, orb.scale, angle, stretchX, stretchY);
+        drawOrb(orb.x, orb.y, 1, longAxis, shortAxis, angle);
       }
 
       if (t >= 1) {
         phase = 'holding';
         holdStart = ts;
         lastScrollY = window.scrollY;
+        prevScrollY = window.scrollY;
       }
 
     } else if (phase === 'holding') {
       const holdElapsed = ts - holdStart;
       const holdT = holdElapsed / HOLD_DURATION;
 
-      const scrollDelta = window.scrollY - lastScrollY;
-      lastScrollY = window.scrollY;
+      // Velocidade de scroll para squash dinâmico
+      const currentScrollY = window.scrollY;
+      const rawVel = currentScrollY - prevScrollY;
+      prevScrollY = currentScrollY;
+      // Suaviza a velocidade
+      scrollVelocity += (rawVel - scrollVelocity) * 0.25;
 
-      // Bounce de squash ao chegar: nos primeiros 400ms faz um squash-stretch
-      const bounceT = Math.min(holdElapsed / 400, 1);
-      // Squash inicial (achatado verticalmente), depois normaliza com bounce
-      const bounceSquash = bounceT < 0.4
-        ? 1 - (1 - bounceT / 0.4) * 0.5   // achata ao chegar
-        : 0.5 + ((bounceT - 0.4) / 0.6) * 0.5 + 0.1 * Math.sin((bounceT - 0.4) / 0.6 * Math.PI * 3) * (1 - bounceT); // bounce de volta
-      const bounceStretch = bounceT < 0.4
-        ? 1 + (1 - bounceT / 0.4) * 0.7   // estica ao achatar
-        : 1 + 0.08 * Math.sin((bounceT - 0.4) / 0.6 * Math.PI * 3) * (1 - bounceT);
+      const scrollDelta = currentScrollY - lastScrollY;
+      lastScrollY = currentScrollY;
 
-      // Pulso suave depois do bounce
-      const pulse = 2.2 + 0.3 * Math.sin(holdElapsed * 0.005);
+      // Bounce de chegada nos primeiros 500ms
+      const bounceT = Math.min(holdElapsed / 500, 1);
+      const bounceDecay = 1 - bounceT;
+      const bounceOscillate = Math.sin(bounceT * Math.PI * 4) * bounceDecay;
+
+      // BASE menor em hold: r=7
+      const BASE = 7;
+      // Squash do scroll: quanto mais rápido o scroll, mais achatada verticalmente
+      const scrollSquash = Math.abs(scrollVelocity) * 0.18; // exagerado
+      const holdRX = BASE * (1.0 + bounceOscillate * 0.8 + scrollSquash);
+      const holdRY = BASE * (1.0 - bounceOscillate * 0.5 - scrollSquash * 0.6);
 
       for (const orb of orbs) {
-        orb.y += scrollDelta * 0.08;
+        orb.y += scrollDelta * 0.07;
         orb.y = Math.max(20, Math.min(H - 20, orb.y));
-        // Squash = achata no eixo Y, estica no X (horizontal ao chegar)
-        drawOrb(orb.x, orb.y, 1, pulse, 0, bounceStretch, bounceSquash);
+        drawOrb(orb.x, orb.y, 1, Math.max(3, holdRX), Math.max(3, holdRY));
       }
 
-      // Dispara scroll cedo
-      if (!scrollTriggered && holdElapsed > 120) {
+      if (!scrollTriggered && holdElapsed > 100) {
         scrollTriggered = true;
         smoothScrollTo(targetId);
       }
@@ -204,11 +188,13 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
     } else if (phase === 'fading') {
       const t = Math.min((ts - startTime) / FADE_DURATION, 1);
       const alpha = 1 - easeInOut(t);
-      // Scale explode levemente ao sumir
-      const scale = 2.2 + t * 2.0;
+      // Estica verticalmente ao sumir como se estivesse sendo puxada pra baixo
+      const BASE = 7;
+      const rx = BASE * (1 + t * 0.4);
+      const ry = BASE * (1 + t * 3.5);
 
       for (const orb of orbs) {
-        drawOrb(orb.x, orb.y, alpha, scale);
+        drawOrb(orb.x, orb.y, alpha, rx, ry);
       }
 
       if (t >= 1) {
