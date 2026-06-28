@@ -17,10 +17,7 @@ function smoothScrollTo(id: string) {
   }
 }
 
-function launchOrbsAndScroll(
-  btnEl: HTMLButtonElement,
-  targetId: string
-) {
+function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
   const btnRect = btnEl.getBoundingClientRect();
   const originX = btnRect.left + btnRect.width / 2;
   const originY = btnRect.top + btnRect.height / 2;
@@ -49,68 +46,75 @@ function launchOrbsAndScroll(
   document.body.appendChild(canvas);
   const ctx = canvas.getContext('2d')!;
 
-  const corners = [
-    { tx: 30, ty: 30 },
-    { tx: W - 30, ty: 30 },
+  // Posições finais nos cantos (fixas na tela)
+  const targets = [
+    { x: 40,     y: 40 },      // top-left
+    { x: W - 40, y: 40 },      // top-right
   ];
 
-  const orbs = corners.map((c) => ({
+  // Estado das bolinhas
+  const orbs = targets.map((t) => ({
     x: originX,
     y: originY,
-    tx: c.tx,
-    ty: c.ty,
-    arrived: false,
+    tx: t.x,
+    ty: t.y,
+    scale: 1,
+    alpha: 1,
   }));
 
-  const ORB_DURATION = 600;
-  const HOLD_DURATION = 400;
+  const ORB_DURATION  = 550;   // ms voando até o canto
+  const HOLD_DURATION = 1800;  // ms ficando nos cantos (acompanha scroll)
+  const FADE_DURATION = 500;   // ms sumindo
+
   let startTime: number | null = null;
-  let phase: 'flying' | 'holding' | 'releasing' = 'flying';
+  let phase: 'flying' | 'holding' | 'fading' = 'flying';
   let holdStart = 0;
   let scrollTriggered = false;
+
+  // Scroll acumulado durante o hold, para acompanhar a página
+  let lastScrollY = window.scrollY;
+
+  function easeOut(t: number) {
+    return 1 - Math.pow(1 - t, 3);
+  }
 
   function easeInOut(t: number) {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
   }
 
-  function drawOrb(x: number, y: number, alpha = 1, scale = 1) {
+  function drawOrb(x: number, y: number, alpha: number, scale: number) {
     ctx.save();
     ctx.globalAlpha = alpha;
-    ctx.shadowBlur = 50;
+    ctx.shadowBlur = 55;
     ctx.shadowColor = '#9333EA';
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, 18 * scale);
-    grad.addColorStop(0, '#F0ABFC');
-    grad.addColorStop(0.4, '#A855F7');
-    grad.addColorStop(1, '#6366F1');
+
+    // Glow externo grande
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, 44 * scale);
+    glow.addColorStop(0,   'rgba(168,85,247,0.35)');
+    glow.addColorStop(0.5, 'rgba(99,102,241,0.15)');
+    glow.addColorStop(1,   'rgba(99,102,241,0)');
     ctx.beginPath();
-    ctx.arc(x, y, 18 * scale, 0, Math.PI * 2);
+    ctx.arc(x, y, 44 * scale, 0, Math.PI * 2);
+    ctx.fillStyle = glow;
+    ctx.fill();
+
+    // Corpo da bolinha
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, 20 * scale);
+    grad.addColorStop(0,   '#F0ABFC');
+    grad.addColorStop(0.4, '#A855F7');
+    grad.addColorStop(1,   '#6366F1');
+    ctx.beginPath();
+    ctx.arc(x, y, 20 * scale, 0, Math.PI * 2);
     ctx.fillStyle = grad;
     ctx.fill();
+
     // Brilho interno
-    ctx.globalAlpha = alpha * 0.7;
+    ctx.globalAlpha = alpha * 0.65;
     ctx.fillStyle = 'white';
     ctx.beginPath();
-    ctx.arc(x - 5 * scale, y - 5 * scale, 4 * scale, 0, Math.PI * 2);
+    ctx.arc(x - 6 * scale, y - 6 * scale, 5 * scale, 0, Math.PI * 2);
     ctx.fill();
-    ctx.restore();
-  }
 
-  function drawLine(x1: number, y1: number, x2: number, y2: number, alpha: number) {
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    const grad = ctx.createLinearGradient(x1, y1, x2, y2);
-    grad.addColorStop(0, '#E879F9');
-    grad.addColorStop(0.5, '#A855F7');
-    grad.addColorStop(1, '#6366F1');
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = 2.5;
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = '#9333EA';
-    ctx.setLineDash([6, 4]);
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
     ctx.restore();
   }
 
@@ -121,52 +125,60 @@ function launchOrbsAndScroll(
 
     if (phase === 'flying') {
       const t = Math.min(elapsed / ORB_DURATION, 1);
-      const eased = easeInOut(t);
+      const eased = easeOut(t);
 
       for (const orb of orbs) {
-        const cx = originX + (orb.tx - originX) * eased;
-        const cy = originY + (orb.ty - originY) * eased;
-
-        // Linha do centro do botão até a bolinha
-        drawLine(originX, originY, cx, cy, eased * 0.8);
-        drawOrb(cx, cy);
+        orb.x = originX + (orb.tx - originX) * eased;
+        orb.y = originY + (orb.ty - originY) * eased;
+        // Scale cresce levemente ao chegar
+        orb.scale = 1 + 0.3 * eased;
+        drawOrb(orb.x, orb.y, 1, orb.scale);
       }
 
       if (t >= 1) {
         phase = 'holding';
         holdStart = ts;
-        orbs.forEach((o) => { o.arrived = true; });
+        lastScrollY = window.scrollY;
       }
+
     } else if (phase === 'holding') {
       const holdElapsed = ts - holdStart;
-      const pulse = 1 + 0.15 * Math.sin(holdElapsed * 0.015);
-      const lineAlpha = 0.8 - (holdElapsed / HOLD_DURATION) * 0.3;
+      const holdT = holdElapsed / HOLD_DURATION;
+
+      // Acompanha o scroll — bolinha fica "presa" na tela mas com leve overshoot
+      const scrollDelta = window.scrollY - lastScrollY;
+      lastScrollY = window.scrollY;
+
+      // Escala pulsa levemente simulando "esticando"
+      const stretch = 1.3 + 0.15 * Math.sin(holdElapsed * 0.008);
 
       for (const orb of orbs) {
-        // Linha ficando mais "esticada" e brilhante
-        drawLine(originX, originY, orb.tx, orb.ty, lineAlpha);
-        drawOrb(orb.tx, orb.ty, 1, pulse);
+        // Bolinha segue a tela (fixed), mas com pequeno overshoot vertical
+        orb.y += scrollDelta * 0.08; // leve arrasto
+        // Clamp para não sair da tela
+        orb.y = Math.max(20, Math.min(H - 20, orb.y));
+        drawOrb(orb.x, orb.y, 1, stretch);
       }
 
-      if (!scrollTriggered && holdElapsed > HOLD_DURATION * 0.4) {
+      // Dispara scroll cedo
+      if (!scrollTriggered && holdElapsed > 120) {
         scrollTriggered = true;
         smoothScrollTo(targetId);
       }
 
-      if (holdElapsed >= HOLD_DURATION) {
-        phase = 'releasing';
+      if (holdT >= 1) {
+        phase = 'fading';
         startTime = ts;
       }
-    } else if (phase === 'releasing') {
-      const t = Math.min((ts - startTime) / 400, 1);
+
+    } else if (phase === 'fading') {
+      const t = Math.min((ts - startTime) / FADE_DURATION, 1);
       const alpha = 1 - easeInOut(t);
+      // Scale explode levemente ao sumir
+      const scale = 1.3 + t * 0.8;
 
       for (const orb of orbs) {
-        // Linha "soltando" — encolhe de volta para o botão
-        const lineEndX = orb.tx + (originX - orb.tx) * easeInOut(t);
-        const lineEndY = orb.ty + (originY - orb.ty) * easeInOut(t);
-        drawLine(originX, originY, lineEndX, lineEndY, alpha * 0.8);
-        drawOrb(orb.tx, orb.ty, alpha, 1 + t * 0.5);
+        drawOrb(orb.x, orb.y, alpha, scale);
       }
 
       if (t >= 1) {
@@ -178,13 +190,12 @@ function launchOrbsAndScroll(
     requestAnimationFrame(draw);
   }
 
-  let animId = requestAnimationFrame(draw);
-  void animId;
+  requestAnimationFrame(draw);
 }
 
 export default function Hero() {
   const portfolioBtnRef = useRef<HTMLButtonElement>(null);
-  const contactBtnRef = useRef<HTMLButtonElement>(null);
+  const contactBtnRef   = useRef<HTMLButtonElement>(null);
 
   const handlePortfolio = () => {
     if (portfolioBtnRef.current) launchOrbsAndScroll(portfolioBtnRef.current, 'portfolio');
@@ -198,6 +209,7 @@ export default function Hero() {
     <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="space-y-8 relative z-10">
+
           <div className="flex justify-center mb-4 animate-scale-in relative">
             <div className="relative">
               <div className="absolute -inset-4 bg-gradient-to-r from-primary-purple via-primary-blue to-primary-purple-light rounded-3xl opacity-30 blur-2xl animate-glow-pulse"></div>
@@ -238,9 +250,7 @@ export default function Hero() {
       </div>
 
       <button
-        onClick={() => {
-    smoothScrollTo('portfolio');
-        }}
+        onClick={() => smoothScrollTo('portfolio')}
         className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-10 text-primary-purple-light hover:text-white transition-colors bg-primary-purple/20 rounded-full p-3"
       >
         <ChevronDown size={32} />
