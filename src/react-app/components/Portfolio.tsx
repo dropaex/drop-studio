@@ -83,22 +83,22 @@ export default function Portfolio() {
   function SmallCard({ project, index }: { project: Project; index: number }) {
     return (
       <div
-        className="group rounded-2xl overflow-hidden transition-all duration-700 ease-out animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border border-white/5 hover:shadow-xl hover:shadow-primary-purple/30 hover:scale-[1.13] cursor-default"
+        className="flex flex-col group rounded-2xl overflow-hidden transition-all duration-700 ease-out animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border border-white/5 hover:shadow-xl hover:shadow-primary-purple/30 hover:scale-[1.13] cursor-default flex-1"
         style={{ animationDelay: `${0.2 + index * 0.1}s`, animationFillMode: 'forwards' }}
         onClick={() => project.link && window.open(project.link, '_blank', 'noopener noreferrer')}
       >
-        <div className="relative overflow-hidden">
+        <div className="relative overflow-hidden flex-1">
           {project.isLocalVideo ? (
             <video src={project.video} autoPlay loop muted playsInline
-              className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-700" />
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style={{ minHeight: "160px" }} />
           ) : project.video ? (
             <img src={project.video} alt={project.title}
-              className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-700" />
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style={{ minHeight: "160px" }} />
           ) : project.image ? (
             <img src={project.image} alt={project.title}
-              className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-700" />
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style={{ minHeight: "160px" }} />
           ) : (
-            <div className="w-full h-52 bg-gradient-to-br from-primary-purple/30 to-primary-pink/30 flex items-center justify-center">
+            <div className="w-full bg-gradient-to-br from-primary-purple/30 to-primary-pink/30 flex items-center justify-center" style={{ minHeight: "160px" }}>
               <Play size={36} className="text-white/50" />
             </div>
           )}
@@ -137,15 +137,14 @@ export default function Portfolio() {
   function FeaturedCard({ project }: { project: Project }) {
     return (
       <div
-        className="group rounded-2xl overflow-hidden transition-all duration-500 animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border-2 border-primary-purple/60 shadow-2xl shadow-primary-purple/40 hover:shadow-primary-purple/70 hover:scale-[1.11] cursor-pointer z-10 relative"
+        className="flex flex-col group rounded-2xl overflow-hidden transition-all duration-700 ease-out animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border-2 border-primary-purple/60 shadow-2xl shadow-primary-purple/40 hover:shadow-primary-purple/70 hover:scale-[1.11] cursor-pointer z-10 relative h-full"
         style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}
         onClick={() => project.link && window.open(project.link, '_blank', 'noopener noreferrer')}
       >
         <div className="relative overflow-hidden">
           {project.image ? (
             <img src={project.image} alt={project.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-              style={{ minHeight: '420px', maxHeight: '520px' }} />
+              className="w-full object-cover group-hover:scale-105 transition-transform duration-700 flex-1" style={{ flex: 1, minHeight: "300px" }} />
           ) : (
             <div className="w-full bg-gradient-to-br from-primary-purple/30 to-primary-pink/30 flex items-center justify-center" style={{ height: '370px' }}>
               <Play size={64} className="text-white/50" />
@@ -268,10 +267,10 @@ export default function Portfolio() {
         </div>
 
         {/* Layout: esquerda | destaque | direita */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_1fr] gap-6 items-center relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_1fr] gap-6 items-stretch relative z-10">
 
           {/* Coluna esquerda */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 h-full">
             {leftCards.map((p, i) => <SmallCard key={p.id} project={p} index={i} />)}
           </div>
 
@@ -279,7 +278,7 @@ export default function Portfolio() {
           <FeaturedCard project={featured} />
 
           {/* Coluna direita */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 h-full">
             {rightCards.map((p, i) => <SmallCard key={p.id} project={p} index={i + 2} />)}
           </div>
 
