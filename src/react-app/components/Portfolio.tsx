@@ -38,7 +38,7 @@ export default function Portfolio() {
     {
       id: 5,
       title: "Projetos MMV",
-      category: "motion",
+      category: "mmv",
       description: "Projetos de MMV que destacam edição criativa, motion design e narrativa visual.",
       tools: ["After Effects", "Premiere", "Motion Design"],
       image: "/videos/mmv-thumb.png",
@@ -56,7 +56,7 @@ export default function Portfolio() {
     {
       id: 6,
       title: "Fake 3D",
-      category: "motion",
+      category: "3d",
       description: "Fake 3D usando elementos planos em duas dimensões (2D).",
       tools: ["After Effects", "Photoshop"],
       video: "/videos/ESTADIO_PIKA.mp4",
@@ -67,7 +67,7 @@ export default function Portfolio() {
   const categories = [
     { id: 'all', label: 'Todos' },
     { id: '2d', label: '2D' },
-    { id: 'motion', label: 'Motion' }
+    { id: '3d', label: '3D' }
   ];
 
   const filteredProjects =
@@ -83,22 +83,22 @@ export default function Portfolio() {
   function SmallCard({ project, index }: { project: Project; index: number }) {
     return (
       <div
-        className="group rounded-2xl overflow-hidden transition-all duration-500 animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border border-white/5 hover:shadow-xl hover:shadow-primary-purple/30 hover:scale-[1.04] cursor-default"
+        className="group rounded-2xl overflow-hidden transition-all duration-700 ease-out animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border border-white/5 hover:shadow-xl hover:shadow-primary-purple/30 hover:scale-[1.07] cursor-default"
         style={{ animationDelay: `${0.2 + index * 0.1}s`, animationFillMode: 'forwards' }}
         onClick={() => project.link && window.open(project.link, '_blank', 'noopener noreferrer')}
       >
         <div className="relative overflow-hidden">
           {project.isLocalVideo ? (
             <video src={project.video} autoPlay loop muted playsInline
-              className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-700" />
+              className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-700" />
           ) : project.video ? (
             <img src={project.video} alt={project.title}
-              className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-700" />
+              className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-700" />
           ) : project.image ? (
             <img src={project.image} alt={project.title}
-              className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-700" />
+              className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-700" />
           ) : (
-            <div className="w-full h-40 bg-gradient-to-br from-primary-purple/30 to-primary-pink/30 flex items-center justify-center">
+            <div className="w-full h-52 bg-gradient-to-br from-primary-purple/30 to-primary-pink/30 flex items-center justify-center">
               <Play size={36} className="text-white/50" />
             </div>
           )}
@@ -137,7 +137,7 @@ export default function Portfolio() {
   function FeaturedCard({ project }: { project: Project }) {
     return (
       <div
-        className="group rounded-2xl overflow-hidden transition-all duration-500 animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border-2 border-primary-purple/60 shadow-2xl shadow-primary-purple/40 hover:shadow-primary-purple/70 hover:scale-[1.06] cursor-pointer z-10 relative"
+        className="group rounded-2xl overflow-hidden transition-all duration-500 animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border-2 border-primary-purple/60 shadow-2xl shadow-primary-purple/40 hover:shadow-primary-purple/70 hover:scale-[1.09] cursor-pointer z-10 relative"
         style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}
         onClick={() => project.link && window.open(project.link, '_blank', 'noopener noreferrer')}
       >
