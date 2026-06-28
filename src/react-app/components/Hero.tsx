@@ -1,14 +1,14 @@
+import { useRef } from 'react';
 import { ChevronDown, ArrowRight } from 'lucide-react';
 
 function smoothScrollTo(id: string) {
   const lenis = (window as any).__lenis__;
   const element = document.getElementById(id);
   if (!element) return;
-
   if (lenis) {
     lenis.scrollTo(element, {
       offset: -80,
-      duration: 2.4,
+      duration: 2.2,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });
   } else {
@@ -18,223 +18,186 @@ function smoothScrollTo(id: string) {
 }
 
 function launchOrbsAndScroll(
-  e: React.MouseEvent<HTMLButtonElement>,
+  btnEl: HTMLButtonElement,
   targetId: string
 ) {
-  const btn = e.currentTarget.getBoundingClientRect();
-  const originX = btn.left + btn.width / 2;
-  const originY = btn.top + btn.height / 2;
-
+  const btnRect = btnEl.getBoundingClientRect();
+  const originX = btnRect.left + btnRect.width / 2;
+  const originY = btnRect.top + btnRect.height / 2;
   const W = window.innerWidth;
   const H = window.innerHeight;
 
-  // Dois cantos: top-left e top-right
-  const corners = [
-    { tx: 0, ty: 0 },
-    { tx: W, ty: 0 },
-  ];
+  // Skew só no botão
+  btnEl.style.transition = 'transform 0.25s ease';
+  btnEl.style.transform = 'skewX(12deg) scale(0.96)';
+  setTimeout(() => {
+    btnEl.style.transform = 'skewX(-6deg) scale(1.02)';
+    setTimeout(() => {
+      btnEl.style.transform = '';
+      btnEl.style.transition = '';
+    }, 300);
+  }, 250);
 
   const canvas = document.createElement('canvas');
   canvas.style.cssText = `
-    position: fixed;
-    top: 0; left: 0;
+    position: fixed; top: 0; left: 0;
     width: 100vw; height: 100vh;
-    pointer-events: none;
-    z-index: 9999;
+    pointer-events: none; z-index: 9999;
   `;
   canvas.width = W;
   canvas.height = H;
   document.body.appendChild(canvas);
   const ctx = canvas.getContext('2d')!;
 
-  // Estado das bolinhas
+  const corners = [
+    { tx: 30, ty: 30 },
+    { tx: W - 30, ty: 30 },
+  ];
+
   const orbs = corners.map((c) => ({
     x: originX,
     y: originY,
     tx: c.tx,
     ty: c.ty,
-    progress: 0,
+    arrived: false,
   }));
 
-  // Skew na página
-  const appEl = document.getElementById('root') as HTMLElement;
-  let skewProgress = 0; // 0 → 1 → 0
-  let phase: 'skewIn' | 'hold' | 'skewOut' | 'done' = 'skewIn';
-  const MAX_SKEW = 8; // graus
-  let scrollTriggered = false;
-
-  let animId: number;
+  const ORB_DURATION = 600;
+  const HOLD_DURATION = 400;
   let startTime: number | null = null;
-  const ORB_DURATION = 700; // ms para as bolinhas chegarem aos cantos
-  const HOLD_DURATION = 200; // ms segurando nos cantos
-  const SKEW_IN = 250;
-  const SKEW_OUT = 350;
+  let phase: 'flying' | 'holding' | 'releasing' = 'flying';
+  let holdStart = 0;
+  let scrollTriggered = false;
 
   function easeInOut(t: number) {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
   }
 
+  function drawOrb(x: number, y: number, alpha = 1, scale = 1) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.shadowBlur = 50;
+    ctx.shadowColor = '#9333EA';
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, 18 * scale);
+    grad.addColorStop(0, '#F0ABFC');
+    grad.addColorStop(0.4, '#A855F7');
+    grad.addColorStop(1, '#6366F1');
+    ctx.beginPath();
+    ctx.arc(x, y, 18 * scale, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    // Brilho interno
+    ctx.globalAlpha = alpha * 0.7;
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(x - 5 * scale, y - 5 * scale, 4 * scale, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawLine(x1: number, y1: number, x2: number, y2: number, alpha: number) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    const grad = ctx.createLinearGradient(x1, y1, x2, y2);
+    grad.addColorStop(0, '#E879F9');
+    grad.addColorStop(0.5, '#A855F7');
+    grad.addColorStop(1, '#6366F1');
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 2.5;
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = '#9333EA';
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function draw(ts: number) {
     if (!startTime) startTime = ts;
     const elapsed = ts - startTime;
-
     ctx.clearRect(0, 0, W, H);
 
-    // --- Bolinhas ---
-    const orbT = Math.min(elapsed / ORB_DURATION, 1);
-    const orbEased = easeInOut(orbT);
+    if (phase === 'flying') {
+      const t = Math.min(elapsed / ORB_DURATION, 1);
+      const eased = easeInOut(t);
 
-    for (const orb of orbs) {
-      orb.progress = orbEased;
-      const cx = originX + (orb.tx - originX) * orbEased;
-      const cy = originY + (orb.ty - originY) * orbEased;
+      for (const orb of orbs) {
+        const cx = originX + (orb.tx - originX) * eased;
+        const cy = originY + (orb.ty - originY) * eased;
 
-      // Trilha
-      const trail = ctx.createRadialGradient(cx, cy, 0, cx, cy, 40);
-      trail.addColorStop(0, 'rgba(168,85,247,0.18)');
-      trail.addColorStop(1, 'rgba(168,85,247,0)');
-      ctx.beginPath();
-      ctx.arc(cx, cy, 40, 0, Math.PI * 2);
-      ctx.fillStyle = trail;
-      ctx.fill();
-
-      // Glow externo
-      ctx.save();
-      ctx.shadowBlur = 60;
-      ctx.shadowColor = '#9333EA';
-      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 22);
-      grad.addColorStop(0, '#E879F9');
-      grad.addColorStop(0.4, '#A855F7');
-      grad.addColorStop(1, '#6366F1');
-      ctx.beginPath();
-      ctx.arc(cx, cy, 22, 0, Math.PI * 2);
-      ctx.fillStyle = grad;
-      ctx.fill();
-      ctx.restore();
-
-      // Brilho interno
-      ctx.save();
-      ctx.globalAlpha = 0.7;
-      ctx.fillStyle = 'white';
-      ctx.beginPath();
-      ctx.arc(cx - 6, cy - 6, 5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    // --- Skew na página ---
-    if (phase === 'skewIn') {
-      skewProgress = Math.min(elapsed / SKEW_IN, 1);
-      const skewDeg = easeInOut(skewProgress) * MAX_SKEW;
-      appEl.style.transform = `skewX(${skewDeg}deg)`;
-      appEl.style.transition = 'none';
-      if (skewProgress >= 1) {
-        phase = 'hold';
-        startTime = ts; // reset timer para hold
+        // Linha do centro do botão até a bolinha
+        drawLine(originX, originY, cx, cy, eased * 0.8);
+        drawOrb(cx, cy);
       }
-    } else if (phase === 'hold') {
-      const holdElapsed = ts - startTime;
 
-      // Dispara scroll no meio do hold
-      if (!scrollTriggered && holdElapsed > HOLD_DURATION * 0.3) {
+      if (t >= 1) {
+        phase = 'holding';
+        holdStart = ts;
+        orbs.forEach((o) => { o.arrived = true; });
+      }
+    } else if (phase === 'holding') {
+      const holdElapsed = ts - holdStart;
+      const pulse = 1 + 0.15 * Math.sin(holdElapsed * 0.015);
+      const lineAlpha = 0.8 - (holdElapsed / HOLD_DURATION) * 0.3;
+
+      for (const orb of orbs) {
+        // Linha ficando mais "esticada" e brilhante
+        drawLine(originX, originY, orb.tx, orb.ty, lineAlpha);
+        drawOrb(orb.tx, orb.ty, 1, pulse);
+      }
+
+      if (!scrollTriggered && holdElapsed > HOLD_DURATION * 0.4) {
         scrollTriggered = true;
         smoothScrollTo(targetId);
       }
 
       if (holdElapsed >= HOLD_DURATION) {
-        phase = 'skewOut';
+        phase = 'releasing';
         startTime = ts;
       }
-    } else if (phase === 'skewOut') {
-      const outElapsed = ts - startTime;
-      skewProgress = 1 - Math.min(outElapsed / SKEW_OUT, 1);
-      const skewDeg = easeInOut(skewProgress) * MAX_SKEW;
-      appEl.style.transform = `skewX(${skewDeg}deg)`;
-      if (skewProgress <= 0) {
-        appEl.style.transform = '';
-        phase = 'done';
-      }
-    }
+    } else if (phase === 'releasing') {
+      const t = Math.min((ts - startTime) / 400, 1);
+      const alpha = 1 - easeInOut(t);
 
-    // Fade out das bolinhas quando chegam ao canto
-    if (orbT >= 1) {
-      // Pulsa nos cantos enquanto faz skew
       for (const orb of orbs) {
-        const pulse = 1 + 0.2 * Math.sin(ts * 0.01);
-        const cx = orb.tx === 0 ? 22 : W - 22;
-        const cy = 22;
+        // Linha "soltando" — encolhe de volta para o botão
+        const lineEndX = orb.tx + (originX - orb.tx) * easeInOut(t);
+        const lineEndY = orb.ty + (originY - orb.ty) * easeInOut(t);
+        drawLine(originX, originY, lineEndX, lineEndY, alpha * 0.8);
+        drawOrb(orb.tx, orb.ty, alpha, 1 + t * 0.5);
+      }
 
-        ctx.save();
-        ctx.shadowBlur = 80;
-        ctx.shadowColor = '#9333EA';
-        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 22 * pulse);
-        grad.addColorStop(0, '#E879F9');
-        grad.addColorStop(0.4, '#A855F7');
-        grad.addColorStop(1, '#6366F1');
-        ctx.beginPath();
-        ctx.arc(cx, cy, 22 * pulse, 0, Math.PI * 2);
-        ctx.fillStyle = grad;
-        ctx.fill();
-        ctx.restore();
+      if (t >= 1) {
+        document.body.removeChild(canvas);
+        return;
       }
     }
 
-    if (phase !== 'done') {
-      animId = requestAnimationFrame(draw);
-    } else {
-      // Fade out bolinhas
-      let fadeAlpha = 1;
-      function fadeOut(ts2: number) {
-        ctx.clearRect(0, 0, W, H);
-        fadeAlpha -= 0.06;
-        if (fadeAlpha > 0) {
-          for (const orb of orbs) {
-            const cx = orb.tx === 0 ? 22 : W - 22;
-            const cy = 22;
-            ctx.save();
-            ctx.globalAlpha = fadeAlpha;
-            ctx.shadowBlur = 60;
-            ctx.shadowColor = '#9333EA';
-            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 22);
-            grad.addColorStop(0, '#E879F9');
-            grad.addColorStop(1, '#6366F1');
-            ctx.beginPath();
-            ctx.arc(cx, cy, 22, 0, Math.PI * 2);
-            ctx.fillStyle = grad;
-            ctx.fill();
-            ctx.restore();
-          }
-          requestAnimationFrame(fadeOut);
-        } else {
-          document.body.removeChild(canvas);
-        }
-      }
-      requestAnimationFrame(fadeOut);
-      cancelAnimationFrame(animId);
-    }
+    requestAnimationFrame(draw);
   }
 
-  animId = requestAnimationFrame(draw);
-}
-
-function applyClickSkew(e: React.MouseEvent<HTMLButtonElement>, targetId: string) {
-  launchOrbsAndScroll(e, targetId);
+  let animId = requestAnimationFrame(draw);
+  void animId;
 }
 
 export default function Hero() {
-  const handlePortfolio = (e: React.MouseEvent<HTMLButtonElement>) => {
-    applyClickSkew(e, 'portfolio');
+  const portfolioBtnRef = useRef<HTMLButtonElement>(null);
+  const contactBtnRef = useRef<HTMLButtonElement>(null);
+
+  const handlePortfolio = () => {
+    if (portfolioBtnRef.current) launchOrbsAndScroll(portfolioBtnRef.current, 'portfolio');
   };
 
-  const handleContact = (e: React.MouseEvent<HTMLButtonElement>) => {
-    applyClickSkew(e, 'contato');
+  const handleContact = () => {
+    if (contactBtnRef.current) launchOrbsAndScroll(contactBtnRef.current, 'contato');
   };
 
   return (
     <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="space-y-8 relative z-10">
-          {/* Logo */}
           <div className="flex justify-center mb-4 animate-scale-in relative">
             <div className="relative">
               <div className="absolute -inset-4 bg-gradient-to-r from-primary-purple via-primary-blue to-primary-purple-light rounded-3xl opacity-30 blur-2xl animate-glow-pulse"></div>
@@ -254,6 +217,7 @@ export default function Hero() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
             <button
+              ref={portfolioBtnRef}
               onClick={handlePortfolio}
               className="group relative bg-gradient-to-r from-primary-purple to-primary-purple-light text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-primary-purple/60 transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105 overflow-hidden"
             >
@@ -263,6 +227,7 @@ export default function Hero() {
             </button>
 
             <button
+              ref={contactBtnRef}
               onClick={handleContact}
               className="relative bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-primary-purple/20 transition-all duration-300 hover:scale-105 overflow-hidden"
             >
@@ -273,7 +238,9 @@ export default function Hero() {
       </div>
 
       <button
-        onClick={(e) => applyClickSkew(e, 'portfolio')}
+        onClick={() => {
+    smoothScrollTo('portfolio');
+        }}
         className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-10 text-primary-purple-light hover:text-white transition-colors bg-primary-purple/20 rounded-full p-3"
       >
         <ChevronDown size={32} />
