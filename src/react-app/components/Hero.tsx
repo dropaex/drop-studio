@@ -61,7 +61,7 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
 
   const ORB_DURATION  = 520;
   const HOLD_DURATION = 1800;
-  const FADE_DURATION = 480;
+  const FADE_DURATION = 220;
 
   let startTime: number | null = null;
   let phase: 'flying' | 'holding' | 'fading' = 'flying';
@@ -169,7 +169,7 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
       // Squash do scroll: estica verticalmente e achata horizontalmente
       const scrollStretch = Math.abs(scrollVelocity) * 0.22; // exagerado
       const holdRX = BASE * Math.max(0.75, 1.0 + bounceOscillate * 0.8 - scrollStretch * 0.18);
-      const holdRY = BASE * (1.0 - bounceOscillate * 0.5 + scrollStretch * 1.4);
+      const holdRY = BASE * Math.max(0.75, 1.0 - bounceOscillate * 0.5 + scrollStretch * 0.18);
 
       for (const orb of orbs) {
         orb.y += scrollDelta * 0.07;
@@ -193,13 +193,10 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
     } else if (phase === 'fading') {
       const t = Math.min((ts - startTime) / FADE_DURATION, 1);
       const alpha = 1 - easeInOut(t);
-      // Estica verticalmente ao sumir como se estivesse sendo puxada pra baixo
       const BASE = 11;
-      const rx = BASE * (1 + t * 0.4);
-      const ry = BASE * (1 + t * 3.5);
 
       for (const orb of orbs) {
-        drawOrb(orb.x, orb.y, alpha, rx, ry);
+        drawOrb(orb.x, orb.y, alpha, BASE, BASE);
       }
 
       if (t >= 1) {
