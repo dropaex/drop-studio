@@ -83,7 +83,7 @@ export default function Portfolio() {
   function SmallCard({ project, index }: { project: Project; index: number }) {
     return (
       <div
-        className="group rounded-2xl overflow-hidden transition-all duration-700 ease-out animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border border-white/5 hover:shadow-xl hover:shadow-primary-purple/30 hover:scale-[1.07] cursor-default"
+        className="group rounded-2xl overflow-hidden transition-all duration-700 ease-out animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border border-white/5 hover:shadow-xl hover:shadow-primary-purple/30 hover:scale-[1.13] cursor-default"
         style={{ animationDelay: `${0.2 + index * 0.1}s`, animationFillMode: 'forwards' }}
         onClick={() => project.link && window.open(project.link, '_blank', 'noopener noreferrer')}
       >
@@ -137,7 +137,7 @@ export default function Portfolio() {
   function FeaturedCard({ project }: { project: Project }) {
     return (
       <div
-        className="group rounded-2xl overflow-hidden transition-all duration-500 animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border-2 border-primary-purple/60 shadow-2xl shadow-primary-purple/40 hover:shadow-primary-purple/70 hover:scale-[1.09] cursor-pointer z-10 relative"
+        className="group rounded-2xl overflow-hidden transition-all duration-500 animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border-2 border-primary-purple/60 shadow-2xl shadow-primary-purple/40 hover:shadow-primary-purple/70 hover:scale-[1.11] cursor-pointer z-10 relative"
         style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}
         onClick={() => project.link && window.open(project.link, '_blank', 'noopener noreferrer')}
       >
@@ -145,7 +145,7 @@ export default function Portfolio() {
           {project.image ? (
             <img src={project.image} alt={project.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-              style={{ minHeight: '320px', maxHeight: '420px' }} />
+              style={{ minHeight: '420px', maxHeight: '520px' }} />
           ) : (
             <div className="w-full bg-gradient-to-br from-primary-purple/30 to-primary-pink/30 flex items-center justify-center" style={{ height: '370px' }}>
               <Play size={64} className="text-white/50" />
@@ -202,8 +202,46 @@ export default function Portfolio() {
               ))}
             </div>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
-            {filteredProjects.map((p, i) => <SmallCard key={p.id} project={p} index={i} />)}
+          <div className={`relative z-10 ${filteredProjects.length === 1 ? 'flex justify-center' : 'grid md:grid-cols-2 lg:grid-cols-3 gap-8'}`}>
+            {filteredProjects.length === 1 ? (
+              <div
+                className="group rounded-2xl overflow-hidden transition-all duration-700 ease-out animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border-2 border-primary-purple/60 shadow-2xl shadow-primary-purple/40 hover:shadow-primary-purple/70 hover:scale-[1.11] cursor-default w-full max-w-2xl"
+                style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}
+              >
+                <div className="relative overflow-hidden">
+                  {filteredProjects[0].isLocalVideo ? (
+                    <video src={filteredProjects[0].video} autoPlay loop muted playsInline
+                      className="w-full object-cover group-hover:scale-105 transition-transform duration-700" style={{ height: '420px' }} />
+                  ) : (
+                    <div className="w-full bg-gradient-to-br from-primary-purple/30 to-primary-pink/30 flex items-center justify-center" style={{ height: '420px' }} />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary-purple/50 via-primary-purple/10 to-transparent pointer-events-none" />
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-primary-purple to-primary-purple-light text-white rounded-full p-2 animate-pulse shadow-lg">
+                    <Play size={20} fill="white" />
+                  </div>
+                </div>
+                <div className="p-7 bg-gradient-to-b from-black/60 to-black/40">
+                  <span className="text-xs font-semibold text-white uppercase tracking-widest px-3 py-1 bg-gradient-to-r from-primary-purple to-primary-purple-light rounded-full">
+                    {filteredProjects[0].category}
+                  </span>
+                  <h3 className="text-2xl font-black text-white mt-3 mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-primary-purple group-hover:to-primary-purple-light group-hover:bg-clip-text transition-all duration-300">
+                    {filteredProjects[0].title}
+                  </h3>
+                  <p className="text-white/70 mb-4 text-sm group-hover:text-white/90 transition-colors">
+                    {filteredProjects[0].description}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {filteredProjects[0].tools.map((tool, i) => (
+                      <span key={i} className="px-3 py-1 text-xs font-medium bg-white/10 text-white/90 rounded-full hover:bg-primary-purple/20 transition-all duration-300">
+                        {tool}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              filteredProjects.map((p, i) => <SmallCard key={p.id} project={p} index={i} />)
+            )}
           </div>
         </div>
       </section>
@@ -230,7 +268,7 @@ export default function Portfolio() {
         </div>
 
         {/* Layout: esquerda | destaque | direita */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.7fr_1fr] gap-6 items-center relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_1fr] gap-6 items-center relative z-10">
 
           {/* Coluna esquerda */}
           <div className="flex flex-col gap-6">
