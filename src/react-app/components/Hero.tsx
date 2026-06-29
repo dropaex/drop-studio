@@ -252,11 +252,45 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
 
     } else if (phase === 'fading') {
       const t = Math.min((ts - startTime) / FADE_DURATION, 1);
+      // Alpha sai suave no começo e acelera no fim
       const alpha = 1 - easeInOut(t);
       const BASE = 11;
-      for (const orb of orbs) {
-        drawOrb(orb.x, orb.y, alpha, BASE, BASE, 0, 0, ts);
+      // Bolha expande levemente e depois implode (como bolha estourando)
+      const popT = t < 0.6 ? t / 0.6 : 1;
+      const expandScale = 1 + popT * 0.5;          // cresce até 1.5x
+      const implodeScale = t > 0.6 ? 1 + (1 - (t - 0.6) / 0.4) * 0.5 : expandScale; // implode de volta
+      const rx = BASE * implodeScale;
+      const ry = BASE * implodeScale;
+
+      // Mini partículas roxas saindo da bolha ao estourar
+      if (t > 0.55) {
+        const burstT = (t - 0.55) / 0.45;
+        const numParticles = 8;
+        for (const orb of orbs) {
+          for (let p = 0; p < numParticles; p++) {
+            const angle = (p / numParticles) * Math.PI * 2;
+            const dist = BASE * 1.5 + burstT * BASE * 2.5;
+            const px = orb.x + Math.cos(angle) * dist;
+            const py = orb.y + Math.sin(angle) * dist;
+            const pAlpha = (1 - burstT) * alpha;
+            const pSize = BASE * 0.22 * (1 - burstT * 0.7);
+            ctx.save();
+            ctx.globalAlpha = pAlpha;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(167,139,250,1)';
+            ctx.fillStyle = p % 2 === 0 ? 'rgba(192,132,252,0.9)' : 'rgba(245,208,254,0.9)';
+            ctx.beginPath();
+            ctx.arc(px, py, Math.max(1, pSize), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        }
       }
+
+      for (const orb of orbs) {
+        drawOrb(orb.x, orb.y, alpha, rx, ry, 0, 0, ts);
+      }
+
       if (t >= 1) {
         document.body.removeChild(canvas);
         return;
@@ -296,7 +330,7 @@ export default function Hero() {
               <img
                 src="/logo.png"
                 alt="Drop Studio"
-                className="h-56 md:h-80 w-auto transition-transform duration-700 ease-out group-hover:scale-110"
+                className="h-72 md:h-96 w-auto transition-transform duration-700 ease-out group-hover:scale-110"
                 style={{
                   filter: 'drop-shadow(0 0 40px rgba(168,85,247,0.65)) drop-shadow(0 0 12px rgba(168,85,247,0.35))',
                   display: 'block',
