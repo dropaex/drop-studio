@@ -2,28 +2,20 @@ import { useState } from 'react';
 import { Send, CheckCircle } from 'lucide-react';
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: '',
-    project: '',
-    budget: '',
-    message: ''
-  });
+  const [formData, setFormData] = useState({ name: '', project: '', budget: '', message: '' });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
       if (!response.ok) throw new Error("Erro ao enviar");
-
       setIsSubmitted(true);
       setFormData({ name: "", project: "", budget: "", message: "" });
       setTimeout(() => setIsSubmitted(false), 3000);
@@ -42,23 +34,15 @@ export default function Contact() {
     <section id="contato" className="py-24 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-5xl md:text-6xl font-black text-primary-purple mb-6">
-            Gostou do que viu?
-          </h2>
-          <p className="text-lg text-white/70 max-w-2xl mx-auto">
-            Pronto para dar vida ao seu projeto? Entre em contato para discutirmos suas necessidades.
-          </p>
+          <h2 className="text-5xl md:text-6xl font-black text-primary-purple mb-6">Gostou do que viu?</h2>
+          <p className="text-lg text-white/70 max-w-2xl mx-auto">Pronto para dar vida ao seu projeto? Entre em contato para discutirmos suas necessidades.</p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
+          {/* Form */}
           <div className="bg-gradient-to-br from-primary-purple/10 to-primary-purple-light/10 backdrop-blur-sm rounded-2xl p-8 transition-all duration-500 relative overflow-hidden">
             <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-primary-purple/20 to-primary-purple-light/20 rounded-full blur-2xl"></div>
-
-            <h3 className="text-3xl font-black text-primary-purple mb-6 relative z-10">
-              Solicitar Orçamento
-            </h3>
-
+            <h3 className="text-3xl font-black text-primary-purple mb-6 relative z-10">Solicitar Orçamento</h3>
             {isSubmitted ? (
               <div className="text-center py-8 relative z-10">
                 <div className="inline-block bg-gradient-to-r from-green-400 to-green-600 rounded-full p-4 mb-4">
@@ -71,14 +55,10 @@ export default function Contact() {
               <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
                 <div>
                   <label htmlFor="name" className="block text-sm font-semibold text-white/90 mb-2">Nome *</label>
-                  <input
-                    type="text" id="name" name="name" required
-                    value={formData.name} onChange={handleChange}
+                  <input type="text" id="name" name="name" required value={formData.name} onChange={handleChange}
                     className="w-full px-4 py-3 rounded-xl bg-white/5 border border-primary-purple/30 focus:border-primary-purple focus:ring-2 focus:ring-primary-purple/20 text-white placeholder-white/40 transition-all"
-                    placeholder="Seu nome completo"
-                  />
+                    placeholder="Seu nome completo" />
                 </div>
-
                 <div>
                   <label htmlFor="project" className="block text-sm font-semibold text-white/90 mb-2">Tipo de Projeto</label>
                   <select id="project" name="project" value={formData.project} onChange={handleChange}
@@ -91,7 +71,6 @@ export default function Contact() {
                     <option value="outro" className="bg-primary-purple text-white">Outro</option>
                   </select>
                 </div>
-
                 <div>
                   <label htmlFor="budget" className="block text-sm font-semibold text-white/90 mb-2">Orçamento Estimado</label>
                   <select id="budget" name="budget" value={formData.budget} onChange={handleChange}
@@ -121,17 +100,12 @@ export default function Contact() {
                     )}
                   </select>
                 </div>
-
                 <div>
                   <label htmlFor="message" className="block text-sm font-semibold text-white/90 mb-2">Mensagem *</label>
-                  <textarea
-                    id="message" name="message" required rows={4}
-                    value={formData.message} onChange={handleChange}
+                  <textarea id="message" name="message" required rows={4} value={formData.message} onChange={handleChange}
                     className="w-full px-4 py-3 rounded-xl bg-white/5 border border-primary-purple/30 focus:border-primary-purple focus:ring-2 focus:ring-primary-purple/20 text-white placeholder-white/40 transition-all resize-none"
-                    placeholder="Conte-me mais sobre seu projeto..."
-                  />
+                    placeholder="Conte-me mais sobre seu projeto..." />
                 </div>
-
                 <button type="submit" disabled={isLoading}
                   className="w-full bg-gradient-to-r from-primary-purple to-primary-purple-light text-white py-4 px-6 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-primary-purple/60 transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed">
                   <Send size={20} />
@@ -145,24 +119,16 @@ export default function Contact() {
           <div className="space-y-8">
             <div>
               <h3 className="text-3xl font-black text-primary-purple mb-6">
-                Outras Formas de Contato
+                Formas de Contato
               </h3>
-
               <p className="text-white/80 mb-6">
                 Caso necessite ver mais projetos, aqui abaixo está meu{' '}
                 <span className="font-bold text-transparent bg-gradient-to-r from-primary-purple to-primary-purple-light bg-clip-text">Behance</span>
               </p>
-
               <div className="space-y-4">
-                {/* Discord */}
-                <a
-                  href="https://discord.com/users/950790563530166282"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-4 bg-gradient-to-br from-primary-purple/10 to-primary-purple-light/10 backdrop-blur-sm p-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary-purple/30"
-                >
+                <a href="https://discord.com/users/950790563530166282" target="_blank" rel="noopener noreferrer"
+                  className="flex items-center space-x-4 bg-gradient-to-br from-primary-purple/10 to-primary-purple-light/10 backdrop-blur-sm p-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary-purple/30">
                   <div className="bg-gradient-to-br from-primary-purple to-primary-purple-light p-4 rounded-xl shadow-lg">
-                    {/* Discord official icon */}
                     <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
                     </svg>
@@ -173,7 +139,6 @@ export default function Contact() {
                   </div>
                 </a>
 
-                {/* X (Twitter) */}
                 <div className="flex items-center space-x-4 bg-gradient-to-br from-primary-purple/10 to-primary-purple-light/10 backdrop-blur-sm p-4 rounded-xl transition-all duration-300 hover:scale-105">
                   <div className="bg-gradient-to-br from-primary-purple to-primary-purple-light p-4 rounded-xl shadow-lg">
                     <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -186,7 +151,6 @@ export default function Contact() {
                   </div>
                 </div>
 
-                {/* Behance */}
                 <a href="https://www.behance.net/drop_aex" target="_blank" rel="noopener noreferrer"
                   className="flex items-center space-x-4 bg-gradient-to-br from-primary-purple/50 to-primary-purple-light/50 backdrop-blur-sm p-5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary-purple/50 border-2 border-primary-purple/60 animate-glow-pulse overflow-hidden relative group/behance">
                   <div className="absolute inset-0 -translate-x-full group-hover/behance:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12"></div>
@@ -211,9 +175,7 @@ export default function Contact() {
             <div className="bg-gradient-to-br from-primary-purple/20 to-primary-purple-light/20 backdrop-blur-sm rounded-2xl p-6 relative overflow-hidden">
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-primary-blue/30 to-primary-purple/30 rounded-full blur-2xl"></div>
               <h4 className="text-xl font-semibold text-white mb-3 relative z-10">Tempo de Resposta</h4>
-              <p className="text-white/70 mb-4 text-sm relative z-10">
-                Respondo a todas as mensagens em até 24 horas durante dias úteis.
-              </p>
+              <p className="text-white/70 mb-4 text-sm relative z-10">Respondo a todas as mensagens em até 24 horas durante dias úteis.</p>
               <div className="space-y-2 text-sm relative z-10">
                 <div className="flex justify-between bg-white/10 p-3 rounded-lg">
                   <span className="text-white/70">Orçamentos:</span>
