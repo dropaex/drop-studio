@@ -255,15 +255,21 @@ export default function Hero() {
 
           {/* Logo — flutuando, sem caixa */}
           <div className="flex justify-center mb-4 animate-scale-in">
-            <img
-              src="https://mocha-cdn.com/0199ca3f-5871-7d40-b087-febfeb43f048/imagem_2025-10-09_235545032-remov111ebg-previe1w-(1).png"
-              alt="Drop Studio"
-              className="h-40 md:h-64 w-auto animate-float hover:scale-110 transition-transform duration-700 ease-out cursor-pointer"
-              style={{
-                filter: 'drop-shadow(0 0 40px rgba(168,85,247,0.65)) drop-shadow(0 0 12px rgba(168,85,247,0.35))',
-                padding: '24px',
-              }}
-            />
+            {/* wrapper com padding generoso para o glow não ser cortado */}
+            <div
+              className="animate-float group cursor-pointer p-10"
+              style={{ display: 'inline-block' }}
+            >
+              <img
+                src="https://mocha-cdn.com/0199ca3f-5871-7d40-b087-febfeb43f048/imagem_2025-10-09_235545032-remov111ebg-previe1w-(1).png"
+                alt="Drop Studio"
+                className="h-40 md:h-64 w-auto transition-transform duration-700 ease-out group-hover:scale-110"
+                style={{
+                  filter: 'drop-shadow(0 0 40px rgba(168,85,247,0.65)) drop-shadow(0 0 12px rgba(168,85,247,0.35))',
+                  display: 'block',
+                }}
+              />
+            </div>
           </div>
 
           <p className="text-xl text-white max-w-xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
