@@ -261,7 +261,7 @@ export default function Hero() {
               style={{ display: 'inline-block' }}
             >
               <img
-                src="https://mocha-cdn.com/0199ca3f-5871-7d40-b087-febfeb43f048/imagem_2025-10-09_235545032-remov111ebg-previe1w-(1).png"
+                src="/logo.png"
                 alt="Drop Studio"
                 className="h-40 md:h-64 w-auto transition-transform duration-700 ease-out group-hover:scale-110"
                 style={{
