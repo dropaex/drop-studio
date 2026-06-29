@@ -105,50 +105,83 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
     }
     ctx.closePath();
 
-    // Interior quase transparente com toque roxo
-    const fill = ctx.createRadialGradient(rx * 0.1, -ry * 0.2, 0, 0, 0, Math.max(rx, ry));
-    fill.addColorStop(0,   `rgba(220,180,255,${alpha * 0.08})`);
-    fill.addColorStop(0.5, `rgba(168,85,247,${alpha * 0.05})`);
-    fill.addColorStop(1,   `rgba(99,102,241,${alpha * 0.12})`);
+    // Glow externo roxo forte antes de tudo
+    ctx.shadowBlur = 35;
+    ctx.shadowColor = `rgba(147,51,234,${alpha * 0.95})`;
+
+    // Interior — gradiente roxo mais rico e visível
+    const fill = ctx.createRadialGradient(rx * 0.15, -ry * 0.25, 0, 0, 0, Math.max(rx, ry) * 1.1);
+    fill.addColorStop(0,   `rgba(233,213,255,${alpha * 0.22})`); // lavanda claro
+    fill.addColorStop(0.3, `rgba(192,132,252,${alpha * 0.15})`); // roxo médio
+    fill.addColorStop(0.7, `rgba(147,51,234,${alpha * 0.12})`);  // roxo forte
+    fill.addColorStop(1,   `rgba(88,28,135,${alpha * 0.20})`);   // roxo escuro na borda interna
     ctx.fillStyle = fill;
     ctx.fill();
 
-    // Borda iridescente roxa — linha fina brilhante
-    ctx.shadowBlur = 18;
-    ctx.shadowColor = `rgba(168,85,247,${alpha * 0.9})`;
+    // Borda roxa brilhante — mais espessa e saturada
+    ctx.shadowBlur = 28;
+    ctx.shadowColor = `rgba(167,139,250,${alpha})`;
     const stroke = ctx.createLinearGradient(-rx, -ry, rx, ry);
-    stroke.addColorStop(0,    `rgba(240,171,252,${alpha * 0.95})`); // pink claro
-    stroke.addColorStop(0.25, `rgba(168,85,247,${alpha * 1.0})`);   // roxo
-    stroke.addColorStop(0.5,  `rgba(129,140,248,${alpha * 0.85})`); // indigo
-    stroke.addColorStop(0.75, `rgba(196,130,255,${alpha * 1.0})`);  // lavanda
-    stroke.addColorStop(1,    `rgba(240,171,252,${alpha * 0.95})`); // pink claro
+    stroke.addColorStop(0,    `rgba(245,208,254,${alpha})`);     // pink-roxo topo
+    stroke.addColorStop(0.2,  `rgba(192,132,252,${alpha})`);     // roxo claro
+    stroke.addColorStop(0.45, `rgba(147,51,234,${alpha})`);      // roxo puro
+    stroke.addColorStop(0.6,  `rgba(109,40,217,${alpha})`);      // roxo escuro
+    stroke.addColorStop(0.8,  `rgba(167,139,250,${alpha})`);     // lilás
+    stroke.addColorStop(1,    `rgba(245,208,254,${alpha})`);     // volta pink-roxo
     ctx.strokeStyle = stroke;
-    ctx.lineWidth = Math.max(rx, ry) * 0.12;
+    ctx.lineWidth = Math.max(rx, ry) * 0.16;
     ctx.stroke();
 
-    // Reflexo principal — brilho branco no topo-esquerdo
+    // Reflexo principal — brilho branco-lilás topo-esquerdo
     ctx.shadowBlur = 0;
-    const refX = -rx * 0.32;
-    const refY = -ry * 0.35;
-    const refGrad = ctx.createRadialGradient(refX, refY, 0, refX, refY, rx * 0.38);
-    refGrad.addColorStop(0,   `rgba(255,255,255,${alpha * 0.85})`);
-    refGrad.addColorStop(0.4, `rgba(255,255,255,${alpha * 0.25})`);
+    const refX = -rx * 0.3;
+    const refY = -ry * 0.32;
+    const refGrad = ctx.createRadialGradient(refX, refY, 0, refX, refY, rx * 0.42);
+    refGrad.addColorStop(0,   `rgba(255,255,255,${alpha * 0.92})`);
+    refGrad.addColorStop(0.35,`rgba(233,213,255,${alpha * 0.35})`);
     refGrad.addColorStop(1,   'rgba(255,255,255,0)');
     ctx.fillStyle = refGrad;
     ctx.beginPath();
-    ctx.ellipse(refX, refY, rx * 0.38, ry * 0.28, -0.4, 0, Math.PI * 2);
+    ctx.ellipse(refX, refY, rx * 0.42, ry * 0.3, -0.4, 0, Math.PI * 2);
     ctx.fill();
 
-    // Reflexo secundário menor — parte inferior direita
-    const ref2X = rx * 0.3;
-    const ref2Y = ry * 0.38;
-    const refGrad2 = ctx.createRadialGradient(ref2X, ref2Y, 0, ref2X, ref2Y, rx * 0.18);
-    refGrad2.addColorStop(0,   `rgba(220,180,255,${alpha * 0.5})`);
-    refGrad2.addColorStop(1,   'rgba(220,180,255,0)');
+    // Reflexo secundário inferior-direito levemente roxo
+    const ref2X = rx * 0.28;
+    const ref2Y = ry * 0.35;
+    const refGrad2 = ctx.createRadialGradient(ref2X, ref2Y, 0, ref2X, ref2Y, rx * 0.22);
+    refGrad2.addColorStop(0,   `rgba(216,180,254,${alpha * 0.65})`);
+    refGrad2.addColorStop(1,   'rgba(216,180,254,0)');
     ctx.fillStyle = refGrad2;
     ctx.beginPath();
-    ctx.ellipse(ref2X, ref2Y, rx * 0.18, ry * 0.12, 0.3, 0, Math.PI * 2);
+    ctx.ellipse(ref2X, ref2Y, rx * 0.22, ry * 0.14, 0.3, 0, Math.PI * 2);
     ctx.fill();
+
+    // Brilho de estrela no topo (sparkle)
+    const spX = -rx * 0.18;
+    const spY = -ry * 0.42;
+    const spSize = Math.max(rx, ry) * 0.13;
+    ctx.save();
+    ctx.globalAlpha = alpha * 0.9;
+    ctx.strokeStyle = `rgba(255,255,255,0.95)`;
+    ctx.lineWidth = spSize * 0.22;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = 'rgba(216,180,254,1)';
+    // cruz de 4 pontas
+    for (let s = 0; s < 2; s++) {
+      ctx.beginPath();
+      ctx.save();
+      ctx.translate(spX, spY);
+      ctx.rotate(s * Math.PI / 4);
+      ctx.moveTo(0, -spSize);
+      ctx.lineTo(0,  spSize);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(-spSize, 0);
+      ctx.lineTo( spSize, 0);
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.restore();
 
     ctx.restore();
   }
@@ -263,7 +296,7 @@ export default function Hero() {
               <img
                 src="/logo.png"
                 alt="Drop Studio"
-                className="h-40 md:h-64 w-auto transition-transform duration-700 ease-out group-hover:scale-110"
+                className="h-56 md:h-80 w-auto transition-transform duration-700 ease-out group-hover:scale-110"
                 style={{
                   filter: 'drop-shadow(0 0 40px rgba(168,85,247,0.65)) drop-shadow(0 0 12px rgba(168,85,247,0.35))',
                   display: 'block',
