@@ -196,7 +196,7 @@ export default function Hero() {
   };
 
   return (
-    <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden">
+    <section id="home" className="min-h-screen flex items-center justify-center relative">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="space-y-8 relative z-10">
 
@@ -205,9 +205,10 @@ export default function Hero() {
             <img
               src="https://mocha-cdn.com/0199ca3f-5871-7d40-b087-febfeb43f048/imagem_2025-10-09_235545032-remov111ebg-previe1w-(1).png"
               alt="Drop Studio"
-              className="h-40 md:h-64 w-auto animate-float"
+              className="h-40 md:h-64 w-auto animate-float hover:scale-110 transition-transform duration-700 ease-out cursor-pointer"
               style={{
-                filter: 'drop-shadow(0 0 32px rgba(168,85,247,0.55)) drop-shadow(0 0 8px rgba(168,85,247,0.3))',
+                filter: 'drop-shadow(0 0 40px rgba(168,85,247,0.65)) drop-shadow(0 0 12px rgba(168,85,247,0.35))',
+                padding: '24px',
               }}
             />
           </div>
