@@ -79,24 +79,77 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
     rx: number,
     ry: number,
     angle = 0,
-    anchorOffsetX = 0
+    anchorOffsetX = 0,
+    wobble = 0   // tempo em ms para animação orgânica
   ) {
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.translate(x - anchorOffsetX, y);
     ctx.rotate(angle);
     ctx.translate(anchorOffsetX, 0);
-    ctx.shadowBlur = 30;
-    ctx.shadowColor = '#A855F7';
+
+    // Forma da bolha com wobble orgânico (distorção senoidal nas bordas)
     ctx.beginPath();
-    ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
-    ctx.fillStyle = '#A855F7';
+    const steps = 80;
+    for (let i = 0; i <= steps; i++) {
+      const a = (i / steps) * Math.PI * 2;
+      // Wobble: ondas de frequência baixa para simular tensão superficial
+      const w1 = Math.sin(a * 2 + wobble * 0.003) * 0.06;
+      const w2 = Math.sin(a * 3 - wobble * 0.002) * 0.04;
+      const w3 = Math.sin(a * 5 + wobble * 0.004) * 0.025;
+      const wFactor = 1 + w1 + w2 + w3;
+      const px = Math.cos(a) * rx * wFactor;
+      const py = Math.sin(a) * ry * wFactor;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+
+    // Interior quase transparente com toque roxo
+    const fill = ctx.createRadialGradient(rx * 0.1, -ry * 0.2, 0, 0, 0, Math.max(rx, ry));
+    fill.addColorStop(0,   `rgba(220,180,255,${alpha * 0.08})`);
+    fill.addColorStop(0.5, `rgba(168,85,247,${alpha * 0.05})`);
+    fill.addColorStop(1,   `rgba(99,102,241,${alpha * 0.12})`);
+    ctx.fillStyle = fill;
     ctx.fill();
-    ctx.globalAlpha = alpha * 0.5;
-    ctx.fillStyle = '#E9D5FF';
+
+    // Borda iridescente roxa — linha fina brilhante
+    ctx.shadowBlur = 18;
+    ctx.shadowColor = `rgba(168,85,247,${alpha * 0.9})`;
+    const stroke = ctx.createLinearGradient(-rx, -ry, rx, ry);
+    stroke.addColorStop(0,    `rgba(240,171,252,${alpha * 0.95})`); // pink claro
+    stroke.addColorStop(0.25, `rgba(168,85,247,${alpha * 1.0})`);   // roxo
+    stroke.addColorStop(0.5,  `rgba(129,140,248,${alpha * 0.85})`); // indigo
+    stroke.addColorStop(0.75, `rgba(196,130,255,${alpha * 1.0})`);  // lavanda
+    stroke.addColorStop(1,    `rgba(240,171,252,${alpha * 0.95})`); // pink claro
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = Math.max(rx, ry) * 0.12;
+    ctx.stroke();
+
+    // Reflexo principal — brilho branco no topo-esquerdo
+    ctx.shadowBlur = 0;
+    const refX = -rx * 0.32;
+    const refY = -ry * 0.35;
+    const refGrad = ctx.createRadialGradient(refX, refY, 0, refX, refY, rx * 0.38);
+    refGrad.addColorStop(0,   `rgba(255,255,255,${alpha * 0.85})`);
+    refGrad.addColorStop(0.4, `rgba(255,255,255,${alpha * 0.25})`);
+    refGrad.addColorStop(1,   'rgba(255,255,255,0)');
+    ctx.fillStyle = refGrad;
     ctx.beginPath();
-    ctx.ellipse(-rx * 0.25, -ry * 0.25, rx * 0.3, ry * 0.3, 0, 0, Math.PI * 2);
+    ctx.ellipse(refX, refY, rx * 0.38, ry * 0.28, -0.4, 0, Math.PI * 2);
     ctx.fill();
+
+    // Reflexo secundário menor — parte inferior direita
+    const ref2X = rx * 0.3;
+    const ref2Y = ry * 0.38;
+    const refGrad2 = ctx.createRadialGradient(ref2X, ref2Y, 0, ref2X, ref2Y, rx * 0.18);
+    refGrad2.addColorStop(0,   `rgba(220,180,255,${alpha * 0.5})`);
+    refGrad2.addColorStop(1,   'rgba(220,180,255,0)');
+    ctx.fillStyle = refGrad2;
+    ctx.beginPath();
+    ctx.ellipse(ref2X, ref2Y, rx * 0.18, ry * 0.12, 0.3, 0, Math.PI * 2);
+    ctx.fill();
+
     ctx.restore();
   }
 
@@ -119,7 +172,7 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
         const BASE = 11;
         const longAxis  = BASE * (1 + speed * 2.5);
         const shortAxis = BASE * Math.max(0.35, 1 - speed * 0.65);
-        drawOrb(orb.x, orb.y, 1, longAxis, shortAxis, angle);
+        drawOrb(orb.x, orb.y, 1, longAxis, shortAxis, angle, 0, elapsed);
       }
 
       if (t >= 1) {
@@ -151,7 +204,7 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
         orb.y = Math.max(20, Math.min(H - 20, orb.y));
         const isLeft = orb.tx < W / 2;
         const anchorOffsetX = isLeft ? holdRX : -holdRX;
-        drawOrb(orb.x - anchorOffsetX + anchorOffsetX, orb.y, 1, Math.max(3, holdRX), Math.max(3, holdRY), 0, isLeft ? holdRX : -holdRX);
+        drawOrb(orb.x - anchorOffsetX + anchorOffsetX, orb.y, 1, Math.max(3, holdRX), Math.max(3, holdRY), 0, isLeft ? holdRX : -holdRX, holdElapsed);
       }
 
       if (!scrollTriggered && holdElapsed > 100) {
@@ -169,7 +222,7 @@ function launchOrbsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
       const alpha = 1 - easeInOut(t);
       const BASE = 11;
       for (const orb of orbs) {
-        drawOrb(orb.x, orb.y, alpha, BASE, BASE);
+        drawOrb(orb.x, orb.y, alpha, BASE, BASE, 0, 0, ts);
       }
       if (t >= 1) {
         document.body.removeChild(canvas);
