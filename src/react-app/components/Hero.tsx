@@ -330,7 +330,7 @@ export default function Hero() {
               <img
                 src="/logo.png"
                 alt="Drop Studio"
-                className="w-[420px] md:w-[580px] max-w-full transition-transform duration-700 ease-out group-hover:scale-110"
+                className="w-full max-w-xl md:max-w-2xl transition-transform duration-700 ease-out group-hover:scale-110"
                 style={{
                   filter: 'drop-shadow(0 0 40px rgba(168,85,247,0.65)) drop-shadow(0 0 12px rgba(168,85,247,0.35))',
                   display: 'block',
