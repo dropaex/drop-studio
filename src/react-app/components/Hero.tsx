@@ -105,7 +105,9 @@ function launchHandsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
         const angle = Math.atan2(dy, dx) * (180 / Math.PI);
         // leve "estica" na direção do movimento via scale assimétrico simulado com rotate + scale
         const scale = 0.85 + speed * 0.25;
-        setHandTransform(hand, scale, angle * 0.15, hand.side === 'left');
+        // Rotaciona para dentro: esquerda gira no sentido horário, direita no anti-horário
+        const flyRotate = hand.side === 'left' ? Math.abs(angle * 0.15) : -Math.abs(angle * 0.15);
+        setHandTransform(hand, scale, flyRotate, hand.side === 'left');
       }
 
       if (t < 1) {
