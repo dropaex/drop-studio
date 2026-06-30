@@ -127,7 +127,7 @@ function launchHandsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
   function grabPhase(startTs: number) {
     // Troca para mão fechada
     for (const hand of hands) {
-      hand.el.src = '/hand-closed.png';
+      hand.el.src = '/hand-closed.webp';
     }
 
     function step(ts: number) {
@@ -190,7 +190,7 @@ function launchHandsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
   // FASE 4: solta a mão (abre de novo) e some com fade + leve recuo
   function releasePhase(startTs: number) {
     for (const hand of hands) {
-      hand.el.src = '/hand-open.png';
+      hand.el.src = '/hand-open.webp';
     }
 
     function step(ts: number) {
