@@ -68,12 +68,11 @@ function launchHandsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
       left: ${originX}px;
       top: ${originY}px;
       transform: translate(-50%, -50%);
-      filter: drop-shadow(0 0 14px rgba(168,85,247,0.85)) drop-shadow(0 0 28px rgba(147,51,234,0.5));
       will-change: transform, left, top, opacity;
       opacity: 1;
     `;
-    // Mão da direita espelhada, para "agarrar" virada para dentro
-    if (t.side === 'right') {
+    // Mão da esquerda espelhada, para "agarrar" virada para dentro
+    if (t.side === 'left') {
       img.style.transform = 'translate(-50%, -50%) scaleX(-1)';
     }
     container.appendChild(img);
@@ -106,7 +105,7 @@ function launchHandsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
         const angle = Math.atan2(dy, dx) * (180 / Math.PI);
         // leve "estica" na direção do movimento via scale assimétrico simulado com rotate + scale
         const scale = 0.85 + speed * 0.25;
-        setHandTransform(hand, scale, angle * 0.15, hand.side === 'right');
+        setHandTransform(hand, scale, angle * 0.15, hand.side === 'left');
       }
 
       if (t < 1) {
@@ -134,7 +133,7 @@ function launchHandsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
         : 0.78 + ((t - 0.5) / 0.5) * 0.22;
 
       for (const hand of hands) {
-        setHandTransform(hand, squeeze, 0, hand.side === 'right');
+        setHandTransform(hand, squeeze, 0, hand.side === 'left');
       }
 
       if (t < 1) {
@@ -165,7 +164,7 @@ function launchHandsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
         hand.curY = Math.max(30, Math.min(H - 30, hand.curY));
         // Pequena rotação para dentro, como se estivesse tracionando
         const pullRotate = hand.side === 'left' ? -6 : 6;
-        setHandTransform(hand, pulse, pullRotate, hand.side === 'right');
+        setHandTransform(hand, pulse, pullRotate, hand.side === 'left');
       }
 
       if (!scrollTriggered && elapsed > 80) {
@@ -197,7 +196,7 @@ function launchHandsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
 
       for (const hand of hands) {
         hand.el.style.opacity = `${opacity}`;
-        setHandTransform(hand, scale, 0, hand.side === 'right');
+        setHandTransform(hand, scale, 0, hand.side === 'left');
       }
 
       if (t < 1) {
