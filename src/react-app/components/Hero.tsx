@@ -20,6 +20,10 @@ function smoothScrollTo(id: string) {
 function easeOut(t: number) { return 1 - Math.pow(1 - t, 3); }
 function easeInOut(t: number) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
 
+// Pré-carrega as imagens das mãos uma vez quando o módulo carrega
+const _preloadOpen = new Image(); _preloadOpen.src = '/hand-open.webp';
+const _preloadClosed = new Image(); _preloadClosed.src = '/hand-closed.webp';
+
 function launchHandsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
   const btnRect = btnEl.getBoundingClientRect();
   const originX = btnRect.left + btnRect.width / 2;
@@ -60,7 +64,7 @@ function launchHandsAndScroll(btnEl: HTMLButtonElement, targetId: string) {
 
   const hands = targets.map((t) => {
     const img = document.createElement('img');
-    img.src = '/hand-open.png';
+    img.src = '/hand-open.webp';
     img.style.cssText = `
       position: absolute;
       width: ${HAND_SIZE}px;
@@ -238,7 +242,7 @@ export default function Hero() {
               style={{ display: 'inline-block' }}
             >
               <img
-                src="/logo.png"
+                src="/logo.webp"
                 alt="Drop Studio"
                 className="w-full max-w-xl md:max-w-2xl transition-transform duration-700 ease-out group-hover:scale-110"
                 style={{

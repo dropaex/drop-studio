@@ -1,61 +1,22 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drop Studio Productions</title>
 
-    <!-- Primary SEO -->
-    <title>Drop Studio | 2D Rigging Animator & Motion Designer</title>
-    <meta
-      name="description"
-      content="Drop Studio é especializado em animação 2D, rigging profissional e motion design criativo. Transformando ideias em animações impactantes."
-    />
-    <meta
-      name="keywords"
-      content="2D animation, rigging 2D, motion design, animator, portfolio, creative studio, character rigging"
-    />
-    <meta name="author" content="Drop Studio" />
-    <link rel="canonical" href="https://dropstudio.online/" />
+    <!-- Preload imagens críticas (logo e mãos) para não travar a animação -->
+    <link rel="preload" as="image" href="/logo.webp" type="image/webp" />
+    <link rel="preload" as="image" href="/hand-open.webp" type="image/webp" />
+    <link rel="preload" as="image" href="/hand-closed.webp" type="image/webp" />
 
-    <!-- Theme -->
-    <meta name="theme-color" content="#6D28D9" />
-
-    <!-- Open Graph (Discord, WhatsApp, Facebook) -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Drop Studio | 2D Rigging & Motion Design" />
-    <meta
-      property="og:description"
-      content="Especialista em animação 2D, rigging e motion design profissional."
-    />
-    <meta property="og:image" content="https://dropstudio.online/preview.jpg" />
-    <meta property="og:url" content="https://dropstudio.online/" />
-    <meta property="og:site_name" content="Drop Studio" />
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Drop Studio | 2D Rigging & Motion Design" />
-    <meta
-      name="twitter:description"
-      content="Especialista em animação 2D, rigging e motion design profissional."
-    />
-    <meta name="twitter:image" content="https://dropstudio.online/preview.jpg" />
-
-    <!-- Favicon completo -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
-
-    <!-- Performance -->
+    <!-- Preload da fonte Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
-
   <body>
     <div id="root"></div>
     <script type="module" src="/src/react-app/main.tsx"></script>
   </body>
 </html>
-
-

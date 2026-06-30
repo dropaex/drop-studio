@@ -93,10 +93,10 @@ export default function Portfolio() {
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style={{ minHeight: "160px" }} />
           ) : project.video ? (
             <img src={project.video} alt={project.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style={{ minHeight: "160px" }} />
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" style={{ minHeight: "160px" }} />
           ) : project.image ? (
             <img src={project.image} alt={project.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style={{ minHeight: "160px" }} />
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" style={{ minHeight: "160px" }} />
           ) : (
             <div className="w-full bg-gradient-to-br from-primary-purple/30 to-primary-pink/30 flex items-center justify-center" style={{ minHeight: "160px" }}>
               <Play size={36} className="text-white/50" />
