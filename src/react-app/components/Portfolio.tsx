@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ExternalLink, Play } from 'lucide-react';
+import { ExternalLink, Play, Maximize2 } from 'lucide-react';
+import VideoPreviewModal from '@/react-app/components/VideoPreviewModal';
 
 interface Project {
  id: number;
@@ -16,6 +17,12 @@ interface Project {
 
 export default function Portfolio() {
  const [selectedCategory, setSelectedCategory] = useState('all');
+ const [preview, setPreview] = useState<{ project: Project; x: number; y: number } | null>(null);
+
+ const openPreview = (project: Project, e: React.MouseEvent) => {
+ e.stopPropagation();
+ setPreview({ project, x: e.clientX, y: e.clientY });
+ };
 
  const projects: Project[] = [
  {
@@ -85,7 +92,11 @@ export default function Portfolio() {
  <div
  className="flex flex-col group rounded-2xl overflow-hidden transition-all duration-700 ease-out animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border border-white/10 hover:border-primary-purple/40 hover:shadow-xl hover:shadow-primary-purple/20 hover:scale-[1.13] cursor-default flex-1"
  style={{ animationDelay: `${0.2 + index * 0.1}s`, animationFillMode: 'forwards' }}
- onClick={() => project.link && window.open(project.link, '_blank', 'noopener noreferrer')}
+ data-cursor-hover
+ onClick={(e) => {
+ if (project.video) openPreview(project, e);
+ else if (project.link) window.open(project.link, '_blank', 'noopener noreferrer');
+ }}
  >
  <div className="relative overflow-hidden flex-1">
  {project.isLocalVideo ? (
@@ -103,6 +114,13 @@ export default function Portfolio() {
  </div>
  )}
  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
+ {project.video && (
+ <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/30">
+ <span className="flex items-center gap-1.5 text-white text-xs font-semibold bg-white/10 backdrop-blur-sm border border-white/20 px-3 py-1.5 rounded-full">
+ <Maximize2 size={13} /> Ver prévia
+ </span>
+ </div>
+ )}
  {(project.video && !project.image) && (
  <div className="absolute top-3 right-3 bg-gradient-to-r from-primary-purple via-primary-purple via-35% to-primary-blue text-white rounded-full p-1.5 animate-pulse shadow-lg">
  <Play size={14} fill="white" />
@@ -139,10 +157,20 @@ export default function Portfolio() {
  <div
  className="flex flex-col group rounded-2xl overflow-hidden transition-all duration-700 ease-out animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border-2 border-primary-purple/40 shadow-2xl shadow-black/40 hover:border-primary-blue/50 hover:shadow-primary-purple/30 hover:scale-[1.11] cursor-pointer z-10 relative h-full"
  style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}
- onClick={() => project.link && window.open(project.link, '_blank', 'noopener noreferrer')}
+ data-cursor-hover
+ onClick={(e) => {
+ if (project.video) openPreview(project, e);
+ else if (project.link) window.open(project.link, '_blank', 'noopener noreferrer');
+ }}
  >
  <div className="relative overflow-hidden">
- {project.image ? (
+ {project.isLocalVideo ? (
+ <video src={project.video} autoPlay loop muted playsInline
+ className="w-full object-cover group-hover:scale-105 transition-transform duration-700 flex-1" style={{ flex: 1, minHeight: "300px" }} />
+ ) : project.video ? (
+ <img src={project.video} alt={project.title}
+ className="w-full object-cover group-hover:scale-105 transition-transform duration-700 flex-1" style={{ flex: 1, minHeight: "300px" }} />
+ ) : project.image ? (
  <img src={project.image} alt={project.title}
  className="w-full object-cover group-hover:scale-105 transition-transform duration-700 flex-1" style={{ flex: 1, minHeight: "300px" }} />
  ) : (
@@ -151,7 +179,14 @@ export default function Portfolio() {
  </div>
  )}
  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent pointer-events-none" />
- {project.link && (
+ {project.video && (
+ <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/30">
+ <span className="flex items-center gap-2 text-white text-sm font-semibold bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-full">
+ <Maximize2 size={15} /> Ver prévia
+ </span>
+ </div>
+ )}
+ {project.link && !project.video && (
  <div className="absolute top-4 right-4 bg-gradient-to-r from-primary-purple via-primary-purple via-35% to-primary-blue text-white rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
  <ExternalLink size={16} />
  </div>
@@ -185,6 +220,7 @@ export default function Portfolio() {
  // Se não há card featured no filtro atual, usa grid normal
  if (!featured) {
  return (
+ <>
  <section id="portfolio" className="py-24 relative overflow-hidden">
  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
  <div className="text-center mb-16 relative z-10 animate-fade-in-up">
@@ -206,6 +242,11 @@ export default function Portfolio() {
  <div
  className="group rounded-2xl overflow-hidden transition-all duration-700 ease-out animate-fade-in-up opacity-0 animate-fade-in bg-gradient-to-br from-black/40 via-black/30 to-transparent backdrop-blur-sm border-2 border-primary-purple/40 shadow-2xl shadow-black/40 hover:border-primary-blue/50 hover:shadow-primary-purple/30 hover:scale-[1.11] cursor-default w-full max-w-2xl"
  style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}
+ data-cursor-hover
+ onClick={(e) => {
+ if (filteredProjects[0].video) openPreview(filteredProjects[0], e);
+ else if (filteredProjects[0].link) window.open(filteredProjects[0].link, '_blank', 'noopener noreferrer');
+ }}
  >
  <div className="relative overflow-hidden">
  {filteredProjects[0].isLocalVideo ? (
@@ -215,6 +256,13 @@ export default function Portfolio() {
  <div className="w-full bg-gradient-to-br from-primary-purple/30 to-primary-pink/30 flex items-center justify-center" style={{ height: '420px' }} />
  )}
  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
+ {filteredProjects[0].video && (
+ <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/30">
+ <span className="flex items-center gap-2 text-white text-sm font-semibold bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-full">
+ <Maximize2 size={15} /> Ver prévia
+ </span>
+ </div>
+ )}
  <div className="absolute top-4 right-4 bg-gradient-to-r from-primary-purple via-primary-purple via-35% to-primary-blue text-white rounded-full p-2 animate-pulse shadow-lg">
  <Play size={20} fill="white" />
  </div>
@@ -244,10 +292,20 @@ export default function Portfolio() {
  </div>
  </div>
  </section>
+
+ {preview && (
+ <VideoPreviewModal
+ project={preview.project}
+ origin={{ x: preview.x, y: preview.y }}
+ onClose={() => setPreview(null)}
+ />
+ )}
+ </>
  );
  }
 
  return (
+ <>
  <section id="portfolio" className="py-24 relative overflow-hidden">
  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
  <div className="text-center mb-16 relative z-10 animate-fade-in-up">
@@ -285,5 +343,14 @@ export default function Portfolio() {
  </div>
  </div>
  </section>
+
+ {preview && (
+ <VideoPreviewModal
+ project={preview.project}
+ origin={{ x: preview.x, y: preview.y }}
+ onClose={() => setPreview(null)}
+ />
+ )}
+ </>
  );
 }
