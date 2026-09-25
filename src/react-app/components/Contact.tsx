@@ -34,7 +34,7 @@ export default function Contact() {
  <section id="contato" className="py-24 relative overflow-hidden">
  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
  <div className="text-center mb-16">
- <h2 className="text-5xl md:text-6xl font-black text-white lightmode:text-gray-900 mb-6">Gostou do que <span className="text-transparent bg-gradient-to-r from-primary-purple via-primary-purple via-35% to-primary-blue bg-clip-text">viu?</span></h2>
+ <h2 className="text-5xl md:text-6xl font-black text-white lightmode:text-gray-900 mb-6">Gostou do que viu?</h2>
  <p className="text-lg text-white/70 lightmode:text-gray-600 max-w-2xl mx-auto">Pronto para dar vida ao seu projeto? Entre em contato para discutirmos suas necessidades.</p>
  </div>
 
@@ -42,7 +42,7 @@ export default function Contact() {
  {/* Form */}
  <div className="bg-ink-900/50 lightmode:bg-white border border-white/10 lightmode:border-gray-200 backdrop-blur-sm rounded-2xl p-8 transition-all duration-500 relative overflow-hidden">
  <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-primary-purple/15 via-primary-purple via-35% to-primary-blue/15 rounded-full blur-2xl"></div>
- <h3 className="text-3xl font-black text-white lightmode:text-gray-900 mb-6 relative z-10">Solicitar <span className="text-transparent bg-gradient-to-r from-primary-purple via-primary-purple via-35% to-primary-blue bg-clip-text">Orçamento</span></h3>
+ <h3 className="text-3xl font-black text-white lightmode:text-gray-900 mb-6 relative z-10">Solicitar Orçamento</h3>
  {isSubmitted ? (
  <div className="text-center py-8 relative z-10">
  <div className="inline-block bg-gradient-to-r from-green-400 to-green-600 rounded-full p-4 mb-4">
@@ -121,7 +121,7 @@ export default function Contact() {
  </h3>
  <p className="text-white/80 lightmode:text-gray-600 mb-6">
  Caso necessite ver mais projetos, aqui abaixo está meu{' '}
- <span className="font-bold text-transparent bg-gradient-to-r from-primary-purple via-primary-purple via-35% to-primary-blue bg-clip-text">Behance</span>
+ <span className="font-bold text-white">Behance</span>
  </p>
  <div className="space-y-4">
  <a href="https://discord.com/users/950790563530166282" target="_blank" rel="noopener noreferrer"

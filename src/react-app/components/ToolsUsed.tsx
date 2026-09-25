@@ -19,7 +19,7 @@ export default function ToolsUsed() {
  <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
  <div className="text-center mb-16 animate-fade-in-up">
  <h2 className="text-5xl md:text-6xl font-black text-white lightmode:text-gray-900 mb-6">
- Ferramentas que <span className="text-transparent bg-gradient-to-r from-primary-purple via-primary-purple via-35% to-primary-blue bg-clip-text">utilizo</span>
+ Ferramentas que utilizo
  </h2>
  <p className="text-lg text-white/80 lightmode:text-gray-600 max-w-2xl mx-auto">
  Um fluxo de trabalho pensado para transformar ideias em animações profissionais
@@ -37,7 +37,7 @@ export default function ToolsUsed() {
  <div className={`w-16 h-16 mx-auto mb-5 rounded-2xl flex items-center justify-center text-2xl font-black shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ${tool.badgeClass}`}>
  {tool.badge}
  </div>
- <h3 className="text-xl font-semibold text-white lightmode:text-gray-900 mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-primary-purple group-hover:via-primary-purple group-hover:via-35% group-hover:to-primary-blue group-hover:bg-clip-text transition-all duration-300">
+ <h3 className="text-xl font-semibold text-white lightmode:text-gray-900 mb-2 group-hover:text-white/90 transition-all duration-300">
  {tool.title}
  </h3>
  <p className="text-white/60 lightmode:text-gray-500 text-sm group-hover:text-white/80 lightmode:group-hover:text-gray-700 transition-colors">

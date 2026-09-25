@@ -134,7 +134,7 @@ export default function Portfolio() {
  </span>
  {project.link && <ExternalLink size={13} className="text-white/40 group-hover:text-primary-purple transition-colors" />}
  </div>
- <h3 className="text-sm font-semibold text-white mb-1 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-primary-purple group-hover:via-primary-purple group-hover:via-35% group-hover:to-primary-blue group-hover:bg-clip-text transition-all duration-300">
+ <h3 className="text-sm font-semibold text-white mb-1 group-hover:text-white/90 transition-all duration-300">
  {project.title}
  </h3>
  <p className="text-white/60 text-xs mb-3 group-hover:text-white/80 transition-colors line-clamp-2">
@@ -199,7 +199,7 @@ export default function Portfolio() {
  </span>
  {project.link && <ExternalLink size={18} className="text-white/50 group-hover:text-primary-purple transition-colors group-hover:rotate-12 duration-300" />}
  </div>
- <h3 className="text-2xl font-black text-white mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-primary-purple group-hover:via-primary-purple group-hover:via-35% group-hover:to-primary-blue group-hover:bg-clip-text transition-all duration-300">
+ <h3 className="text-2xl font-black text-white mb-2 group-hover:text-white/90 transition-all duration-300">
  {project.title}
  </h3>
  <p className="text-white/70 mb-4 text-sm group-hover:text-white/90 transition-colors">
@@ -224,7 +224,7 @@ export default function Portfolio() {
  <section id="portfolio" className="py-24 relative overflow-hidden">
  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
  <div className="text-center mb-16 relative z-10 animate-fade-in-up">
- <h2 className="text-5xl md:text-6xl font-black text-white lightmode:text-gray-900 mb-6">Portf<span className="text-transparent bg-gradient-to-r from-primary-purple via-primary-purple via-35% to-primary-blue bg-clip-text">ólio</span></h2>
+ <h2 className="text-5xl md:text-6xl font-black text-white lightmode:text-gray-900 mb-6">Portfólio</h2>
  <p className="text-lg text-white/80 lightmode:text-gray-600 max-w-2xl mx-auto">Seleção de trabalhos em animação 2D e motion design</p>
  </div>
  <div className="flex justify-center mb-12 relative z-10 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
@@ -271,7 +271,7 @@ export default function Portfolio() {
  <span className="text-xs font-semibold text-white uppercase tracking-widest px-3 py-1 bg-gradient-to-r from-primary-purple via-primary-purple via-35% to-primary-blue rounded-full">
  {filteredProjects[0].category}
  </span>
- <h3 className="text-2xl font-black text-white mt-3 mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-primary-purple group-hover:via-primary-purple group-hover:via-35% group-hover:to-primary-blue group-hover:bg-clip-text transition-all duration-300">
+ <h3 className="text-2xl font-black text-white mt-3 mb-2 group-hover:text-white/90 transition-all duration-300">
  {filteredProjects[0].title}
  </h3>
  <p className="text-white/70 mb-4 text-sm group-hover:text-white/90 transition-colors">
@@ -309,7 +309,7 @@ export default function Portfolio() {
  <section id="portfolio" className="py-24 relative overflow-hidden">
  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
  <div className="text-center mb-16 relative z-10 animate-fade-in-up">
- <h2 className="text-5xl md:text-6xl font-black text-white lightmode:text-gray-900 mb-6">Portf<span className="text-transparent bg-gradient-to-r from-primary-purple via-primary-purple via-35% to-primary-blue bg-clip-text">ólio</span></h2>
+ <h2 className="text-5xl md:text-6xl font-black text-white lightmode:text-gray-900 mb-6">Portfólio</h2>
  <p className="text-lg text-white/80 lightmode:text-gray-600 max-w-2xl mx-auto">Seleção de trabalhos em animação 2D e motion design</p>
  </div>
 
